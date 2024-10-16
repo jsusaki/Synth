@@ -26,8 +26,7 @@ public:
     AudioEngine();
     friend class AudioDriver;
 
-// TODO: Move it to application
-public: // The Synthesizer
+public: // Synthesizers, synthesizers, synthesizers
     Synthesizer synth;
 
 public: // Audio Engine Interface
@@ -54,6 +53,7 @@ private: // Audio Engine Parameters
     f64 m_sample_per_time = 44100.0;
     f64 m_time_per_sample = 1.0 / 44100.0;
     f64 m_global_time     = 0.0;
+
     // Audio Driver
     std::unique_ptr<AudioDriver> m_driver;
 };
