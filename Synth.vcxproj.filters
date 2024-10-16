@@ -69,9 +69,6 @@
     <ClCompile Include="src\GUI\Piano.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Audio\ADSR\ADSR.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Audio\Driver\AudioDriver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1026,9 +1023,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\GUI\Piano.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Audio\ADSR\ADSR.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Audio\Driver\AudioDriver.h">
