@@ -75,6 +75,9 @@
     <ClCompile Include="src\Audio\Synth\Synthesizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ref\ADSR\ADSR.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Core\Application.h">
@@ -1029,6 +1032,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Audio\Synth\Synthesizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ref\ADSR\ADSR.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

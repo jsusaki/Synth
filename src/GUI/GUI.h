@@ -65,7 +65,7 @@ public:
         ImPlot::CreateContext();
 	}
 
-    void Display(WaveData& wave_data, std::unordered_map<std::string, Oscillator>& oscs, f32 master_volume, std::vector<note>& notes)
+    void Display(Synthesizer& synth)
     {
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
@@ -92,9 +92,9 @@ public:
             ImGui::Begin("Mixer");
             {
                 ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.25f);
-                ImGui::SliderFloat("Master Volume", &master_volume, 0.0f, 1.0f);
+                ImGui::SliderFloat("Master Volume", &synth.m_master_volume, 0.0f, 1.0f);
                 ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.25f);
-                ImGui::SliderFloat("OSC 1 Volume", &oscs["OSC1"].volume, 0.0f, 1.0f);
+                ImGui::SliderFloat("OSC 1 Volume", &synth.GetOscillator("OSC1").volume, 0.0f, 1.0f);
             }
             ImGui::End();
 
@@ -103,22 +103,22 @@ public:
             ImGui::Begin("Envelope");
             {
                 ImGui::Text(" A   D   S   R");
-                ImGui::VSliderFloat("##A", size, &oscs["OSC1"].m_envelope.attack_time,       0.0f, 10.0f); ImGui::SameLine();
-                ImGui::VSliderFloat("##D", size, &oscs["OSC1"].m_envelope.decay_time,        0.0f, 10.0f); ImGui::SameLine();
-                ImGui::VSliderFloat("##S", size, &oscs["OSC1"].m_envelope.sustain_amplitude, 0.0f, 1.0f);  ImGui::SameLine();
-                ImGui::VSliderFloat("##R", size, &oscs["OSC1"].m_envelope.release_time,      0.0f, 10.0f);
+                ImGui::VSliderFloat("##A", size, &synth.m_envelope.attack_time,       0.0f, 10.0f); ImGui::SameLine();
+                ImGui::VSliderFloat("##D", size, &synth.m_envelope.decay_time,        0.0f, 10.0f); ImGui::SameLine();
+                ImGui::VSliderFloat("##S", size, &synth.m_envelope.sustain_amplitude, 0.0f, 1.0f);  ImGui::SameLine();
+                ImGui::VSliderFloat("##R", size, &synth.m_envelope.release_time,      0.0f, 10.0f);
             }
             ImGui::End();
 
             // Oscilloscope
             ImGui::Begin("Oscilloscope");
             {
-                ImGui::Text("Waveform: %s",         wave_str(wave_data.waveform).c_str());
-                ImGui::Text("Amplitude: %.2f",      wave_data.wave.amplitude);
-                ImGui::Text("Frequency (Hz): %.2f", wave_data.wave.frequency);
+                ImGui::Text("Waveform: %s",         wave_str(synth.wave_data.waveform).c_str());
+                ImGui::Text("Amplitude: %.2f",      synth.wave_data.wave.amplitude);
+                ImGui::Text("Frequency (Hz): %.2f", synth.wave_data.wave.frequency);
 
                 std::string s;
-                for (auto& n : notes)
+                for (auto& n : synth.notes)
                     s += std::format("{} ", note_str(n.id));
                 ImGui::Text("Note %s", s.c_str());
 
@@ -126,7 +126,7 @@ public:
                 std::vector<f32> ts(sample_size, 0.0f);
                 std::vector<f32> ss(sample_size, 0.0f);
 
-                for (auto& [id, osc] : oscs)
+                for (auto& [id, osc] : synth.oscillators)
                 {
                     ts = std::vector<f32>(sample_size, 0.0f);
                     ss = std::vector<f32>(sample_size, 0.0f);
@@ -134,7 +134,7 @@ public:
                     for (u32 i = 0; i < sample_size; i++)
                     {
                         ts[i] = i;
-                        ss[i] = wave_data.samples[i];
+                        ss[i] = synth.wave_data.samples[i];
                     }
                 }
 

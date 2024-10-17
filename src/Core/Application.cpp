@@ -1,7 +1,7 @@
 #include "Application.h"
 #include <iostream>
 
-Application::Application() : window("Sound Synthesizer", SCREEN_WIDTH, SCREEN_HEIGHT) 
+Application::Application() : m_window("Sound Synthesizer", SCREEN_WIDTH, SCREEN_HEIGHT) 
 {
 
 }
@@ -27,10 +27,10 @@ bool Application::Init()
 
 bool Application::Start()
 {
-    while (!window.ShouldClose())
+    while (!m_window.ShouldClose())
     {
         // Poll events
-        window.PollEvents();
+        m_window.PollEvents();
 
         // Handle timing
         m_t2 = std::chrono::system_clock::now();
@@ -48,14 +48,14 @@ bool Application::Start()
         m_accumulator += m_delta_time;
         while (m_accumulator >= m_delta_time)
         {
-            Simulate(m_elapsed_time);
+            Update(m_elapsed_time);
             m_accumulator -= m_delta_time;
         }
 
         // Rendering pipeline
         Render();
 
-        window.SwapBuffers();
+        m_window.SwapBuffers();
 
         // Update Frame Time Info
         UpdateFrameTime();
@@ -66,16 +66,16 @@ bool Application::Start()
 
 bool Application::ShutDown()
 {
-    audio.Shutdown();
-    gui.Shutdown();
-    window.Close();
+    m_audio.Shutdown();
+    m_gui.Shutdown();
+    m_window.Close();
     return true;
 }
 
 void Application::Create()
 {
-    audio.Init(44100, 2, 8, SAMPLE_RATE/100);
-    gui.Init(window.GetWindow());
+    m_audio.Init(44100, 2, 8, SAMPLE_RATE/100);
+    m_gui.Init(m_window.GetWindow());
 }
 
 // TODO: incorporate in audio control
@@ -99,7 +99,7 @@ void Application::ProcessNoteInput(f32 time, s32 key, u32 note_id, std::vector<n
             notes.emplace_back(n);
 
             // UI link
-            piano.down(note_id, 1);
+            m_piano.down(note_id, 1);
             //std::cout << note_id << std::endl;
         }
     }
@@ -115,7 +115,7 @@ void Application::ProcessNoteInput(f32 time, s32 key, u32 note_id, std::vector<n
                 noteFound->active = true;
 
                 // UI link
-                piano.down(noteFound->id, 1);
+                m_piano.down(noteFound->id, 1);
             }
         }
         else
@@ -124,7 +124,7 @@ void Application::ProcessNoteInput(f32 time, s32 key, u32 note_id, std::vector<n
                 noteFound->off = time;
 
             // UI link
-            piano.up(noteFound->id);
+            m_piano.up(noteFound->id);
             //std::cout << note_id << std::endl;
         }
     }
@@ -137,12 +137,12 @@ void Application::ProcessInput()
 
     // Close the window
     if (input.IsKeyPressed(GLFW_KEY_ESCAPE))
-        window.SetShouldClose();
+        m_window.SetShouldClose();
 
     if (input.IsKeyPressed(GLFW_KEY_SPACE))
     {
-        audio.synth.PlayToggle();
-        gui.Play(audio.synth.IsPlaying());
+        m_audio.synth.PlayToggle();
+        m_gui.Play(m_audio.synth.IsPlaying());
     }
 
     // Control variables
@@ -150,8 +150,8 @@ void Application::ProcessInput()
     static s32 octave = 4*12;
     static f32 osc1_volume = 0.5f;
 
-    f64 time = audio.Time();
-    std::vector<note>& notes = audio.synth.GetNotes();
+    f64 time = m_audio.Time();
+    std::vector<note>& notes = m_audio.synth.GetNotes();
 
     // Synth Control
     // Keyboard Control
@@ -181,22 +181,20 @@ void Application::ProcessInput()
     // Master Volume Control
     if (input.IsKeyPressed(GLFW_KEY_UP))    master_volume += 0.1f;
     if (input.IsKeyPressed(GLFW_KEY_DOWN))  master_volume -= 0.1f;
-    audio.synth.SetMasterVolume(master_volume);
+    m_audio.synth.SetMasterVolume(master_volume);
 
     // Oscillator 1 Control
     if (input.IsKeyPressed(GLFW_KEY_KP_ADD))       osc1_volume += 0.1f;
     if (input.IsKeyPressed(GLFW_KEY_KP_SUBTRACT))  osc1_volume -= 0.1f;
-    audio.synth.GetOscillator("OSC1").SetVolume(osc1_volume);
+    m_audio.synth.GetOscillator("OSC1").SetVolume(osc1_volume);
 
-    if (input.IsKeyPressed(GLFW_KEY_Q)) audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SINE);
-    if (input.IsKeyPressed(GLFW_KEY_W)) audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SQUARE);
-    if (input.IsKeyPressed(GLFW_KEY_E)) audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::TRIANGLE);
-    if (input.IsKeyPressed(GLFW_KEY_R)) audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SAWTOOTH);
+    if (input.IsKeyPressed(GLFW_KEY_Q)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SINE);
+    if (input.IsKeyPressed(GLFW_KEY_W)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SQUARE);
+    if (input.IsKeyPressed(GLFW_KEY_E)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::TRIANGLE);
+    if (input.IsKeyPressed(GLFW_KEY_R)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SAWTOOTH);
     if (input.IsKeyPressed(GLFW_KEY_T)) notes.clear();
 
-
-
-    if (!gui.IsWindowFocused())
+    if (!m_gui.IsWindowFocused())
     {
         if (input.IsButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
         {
@@ -220,16 +218,15 @@ void Application::ProcessInput()
     input.Update();
 }
 
-void Application::Simulate(f32 dt)
+void Application::Update(f32 dt)
 {
-    audio.Update(dt);
-    // Pass synth?
-    gui.Display(audio.synth.GetWaveData(), audio.synth.GetOscillators(), audio.synth.GetMasterVolume(), audio.synth.GetNotes());
+    m_audio.Update(1/SAMPLE_RATE);
+    m_gui.Display(m_audio.synth);
 }
 
 void Application::Render()
 {
-    window.Clear({ 25, 25, 25, 255 });
+    m_window.Clear({ 25, 25, 25, 255 });
 
     // Enable rendering flags
     glEnable(GL_DEPTH_TEST);
@@ -240,10 +237,10 @@ void Application::Render()
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
-    piano.Render(&show);
+    m_piano.Render(&show);
 
     // Render GUI
-    gui.Render();
+    m_gui.Render();
 
 }
 

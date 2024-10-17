@@ -1,41 +1,39 @@
 /*
 	Sound Synthesizer
+		Synthesis
+			Subtractive
+			Additive
+			Frequency Modulation
 		Waveforms
 			Sine Wave
 			Square Wave
 			Triangle Wave
 			Sawtooth Wave
-
+		Noise
+			White
+			Pink
+			Brown
 		Oscillator
-
 		Envelope ADSR
-
 		Low Frequency Oscillator (LFO)
-
 		Frequency Modulator
-
 		Amplitude Modulator
-
 		Arpeggiator
-
+		Note
+		Instrument
+		Sequencer
 		Filter
 			High pass filter
 			Low pass filter
 			Band filter
-
 		Effects
 			Compression / Expansion
 			Flanger / Phaser
-
 			Delay
 			Reverb
 			Chorus
-
-		Instrument
-
-		Note
-
-		Sequencer
+		Spectrogram
+		Oscilloscope
 
 	Modular Synthesizer
 		Wiki, Modular Synthesizer: https://en.wikipedia.org/wiki/Modular_synthesizer
@@ -53,8 +51,8 @@
 
 	Driver Backend
 		miniaudio: https://github.com/mackron/miniaudio
+		soloud: https://github.com/jarikomppa/soloud
 		sdl: https://github.com/libsdl-org/SDL_mixer
-		winmm
 
 	Audio DSP Lib
 		https://github.com/cycfi/q
@@ -66,17 +64,18 @@
 #include "../../Core/Common.h"
 #include "Oscillator.h"
 
-// BUG: Sine Wave Clipping in Release to Attack
 // DONE: Envelope Control
 // DONE: Polyphony
 
+// BUG: Sine Wave Clipping in ADSR: Release to Attack
+// TODO: Envelope ADSR Visualization
 // TODO: Modular Synthesizer
 // TODO: Sequencer
-// TODO: Scope Improvement
-// TODO: Interface Improvement
-
 // TODO: Spectrogram (FFT)
 // TODO: Playback
+
+// TODO: Oscilloscope Improvement
+// TODO: Graphical User Interface Improvement
 
 struct WaveData
 {
@@ -86,29 +85,42 @@ struct WaveData
 	std::vector<f32> samples;
 };
 
+// Modular Synthesizer
 class Synthesizer
 {
 public:
 	Synthesizer();
 
 public:
+	f32 Synthesize(f32 time_step, note n, bool& note_finished);
 	void Update(f64 time);
+
+public:
 	void PlayToggle();
 	bool IsPlaying();
 	void SetMasterVolume(f32 volume);
 	f32 GetMasterVolume();
 
+	std::vector<note>& GetNotes();
 	WaveData& const GetWaveData();
+	void UpdateWaveData(u32 frame, f32 sample);
+
 	Oscillator& GetOscillator(std::string id);
 	std::unordered_map<std::string, Oscillator>& GetOscillators();
-	std::vector<note>& GetNotes();
 
 public:
 	f32 m_master_volume = 0.5f;
 	f32 max_frequency = 20000.0f;
 	bool m_playing = true;
-	WaveData wave_data;
-	std::unordered_map<std::string, Oscillator> oscillators;
+
 	std::vector<note> notes;
 
+	// Modules
+	std::unordered_map<std::string, Oscillator> oscillators;
+	Envelope m_envelope;
+	ADSR m_adsr;
+	
+	// Sample Buffer
+	WaveData wave_data;
 };
+

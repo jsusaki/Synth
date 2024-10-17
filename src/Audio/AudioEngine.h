@@ -24,7 +24,7 @@ class AudioEngine
 {
 public:
     AudioEngine();
-    friend class AudioDriver;
+    friend class MiniAudio;
 
 public: // Synthesizers, synthesizers, synthesizers
     Synthesizer synth;
@@ -34,10 +34,6 @@ public: // Audio Engine Interface
     void Update(f64 time);
     void Shutdown();
 
-public: // Audio Driver Internal
-    // Generate samples for FillOutputBuffer in AudioDriver
-    std::vector<f32>& ProcessOutputBlock(u32 frame_count);
-
 public: // Accessors 
     const f64 Time() const;
     const u32 SampleRate() const;
@@ -45,7 +41,7 @@ public: // Accessors
     const u32 Blocks() const;
     const u32 BlockSamples() const;
 
-private: // Audio Engine Parameters
+private: // Audio Engine Internal
     u32 m_sample_rate     = 44100;
     u32 m_channels        = 1;
     u32 m_blocks          = 8;
@@ -54,6 +50,9 @@ private: // Audio Engine Parameters
     f64 m_time_per_sample = 1.0 / 44100.0;
     f64 m_global_time     = 0.0;
 
+private: // Audio Driver Internal
+    // Generate samples for FillOutputBuffer in AudioDriver
+    std::vector<f32>& ProcessOutputBlock(u32 frame_count);
     // Audio Driver
     std::unique_ptr<AudioDriver> m_driver;
 };

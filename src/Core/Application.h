@@ -27,14 +27,14 @@ public: // Interface
 private: // Main functions
     void Create();
     void ProcessInput();
-    void Simulate(f32 dt);
+    void Update(f32 dt);
     void Render();
 
 private: // Helper functions
     void UpdateFrameTime();
     void ProcessNoteInput(f32 time, s32 key, u32 note_id, std::vector<note>& notes);
 
-private: // Simulator variables
+private: // Internal
     // Timing
     std::chrono::time_point<std::chrono::system_clock> m_t1;
     std::chrono::time_point<std::chrono::system_clock> m_t2;
@@ -45,14 +45,12 @@ private: // Simulator variables
     f32 m_delta_time;
     f32 m_elapsed_time;
     f32 m_last_elapsed_time;
-
     // Window
-    Window window;
+    Window m_window;
 
 private: // Simulation variables
-    AudioEngine audio;
-
-    GUI gui;
-    Piano piano;
+    AudioEngine m_audio;
+    GUI m_gui;
+    Piano m_piano;
     bool show = true;
 };

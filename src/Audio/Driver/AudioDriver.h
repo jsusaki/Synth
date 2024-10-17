@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "miniaudio.h"
+
 #include "../../Core/Common.h"
 
 class AudioEngine;
@@ -37,7 +38,7 @@ public:
     MiniAudio(AudioEngine* host);
     ~MiniAudio();
 
-protected:
+public:
     bool Open() override;
     void Close() override;
     bool Start() override;
@@ -45,7 +46,7 @@ protected:
 
     void FillOutputBuffer(void* pOutput, u32 frameCount);
 
-private:
+private: // miniaudio specific implementations
     static void MiniAudio_Callback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount);
 
     ma_mutex m_mutex; 
