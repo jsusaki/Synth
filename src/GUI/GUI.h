@@ -52,34 +52,6 @@ static bool VSliderDouble(const char* label, const ImVec2& size, double* v, doub
     return ImGui::VSliderScalar(label, size, ImGuiDataType_Double, v, &v_min, &v_max, format, flags);
 }
 
-static std::pair<std::vector<f32>, std::vector<f32>> ComputeEnvelopeCurve(Envelope& envelope, f32 duration, s32 num_points)
-{
-    std::vector<f32> as;
-    std::vector<f32> ts;
-    ts.reserve(num_points);
-    as.reserve(num_points);
-
-    f32 time_step = 1 / SAMPLE_RATE;
-    f32 note_on_time  = 0.0f;
-    f32 note_off_time = 0.0f;
-    f32 global_time   = 0.0f;
-
-    for (s32 i = 0; i < num_points; i++)
-    {
-        f32 t = time_step * i;
-
-        f32 amplitude = envelope.Amplitude(global_time, note_on_time, note_off_time);
-
-        ts.push_back(i);
-        as.push_back(amplitude);
-
-        global_time += t;
-    }
-
-    return std::make_pair(ts, as);
-}
-
-
 class GUI
 {
 public:
@@ -147,20 +119,21 @@ public:
                 VSliderDouble("##S", slider_size, &synth.m_envelope.sustain_amplitude, 0.0, 1.0);  ImGui::SameLine();
                 VSliderDouble("##R", slider_size, &synth.m_envelope.release_time,      0.0, 10.0); ImGui::SameLine();
             
+                // Compute ADSR parametric curve
                 s32 num_points    = 1000;
-                f32 time_step     = 1 / SAMPLE_RATE;
-                f32 note_on_time  = 0.00001f;
-                f32 note_off_time = 0.0f;
-                f32 global_time   = 0.0f;
+                f64 time_step     = 1 / SAMPLE_RATE;
+                f64 note_on_time  = 0.00001;
+                f64 note_off_time = 0.0f;
+                f64 global_time   = 0.0f;
 
-                std::vector<f32> as(num_points, 0.0f);
-                std::vector<f32> ts(num_points, 0.0f);
+                std::vector<f64> as(num_points, 0.0);
+                std::vector<f64> ts(num_points, 0.0);
                 for (s32 i = 0; i < num_points; i++)
                 {
-                    f32 t = i * time_step;
+                    f64 t = i * time_step;
                     if (i == 600) note_off_time = global_time;
 
-                    f32 amplitude = synth.m_envelope.Amplitude(global_time, note_on_time, note_off_time);
+                    f64 amplitude = synth.m_envelope.Amplitude(global_time, note_on_time, note_off_time);
 
                     ts[i] = i;
                     as[i] = amplitude;
@@ -190,19 +163,19 @@ public:
                 for (auto& n : synth.notes)
                 {
                     f += std::format("{:.2f} ", note_to_freq(n.id));
-                    s += std::format("{} ", note_str(n.id));
+                    s += std::format("{} ",     note_str(n.id));
                 }
                 ImGui::Text("Frequency (Hz): %s", f.c_str());
                 ImGui::Text("Note            %s", s.c_str());
 
                 const u32 sample_size = SAMPLE_RATE / 100;
-                std::vector<f32> ts(sample_size, 0.0f);
-                std::vector<f32> ss(sample_size, 0.0f);
+                std::vector<f64> ts(sample_size, 0.0);
+                std::vector<f64> ss(sample_size, 0.0);
 
                 for (auto& [id, osc] : synth.oscillators)
                 {
-                    ts = std::vector<f32>(sample_size, 0.0f);
-                    ss = std::vector<f32>(sample_size, 0.0f);
+                    ts = std::vector<f64>(sample_size, 0.0);
+                    ss = std::vector<f64>(sample_size, 0.0);
 
                     for (u32 i = 0; i < sample_size; i++)
                     {

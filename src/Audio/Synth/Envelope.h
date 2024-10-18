@@ -9,11 +9,6 @@ struct Envelope
     f64 release_time;      // time
     f64 start_amplitude;   // initial amplitude
 
-    // do we need this?
-    f64 attack_rate; 
-    f64 decay_rate;  
-    f64 release_rate;
-
     enum class Decay : u8
     {
         LINEAR,
@@ -25,13 +20,15 @@ struct Envelope
     Decay decay_phase;
     Decay release_phase;
 
-    f32 CalculateDecay(f32 normalized_time, f32 start_amplitude, Decay mode)
+    f64 CalculateDecay(f64 normalized_time, f64 start_amplitude, Decay mode)
     {
         switch (mode)
         {
         case Decay::LINEAR:      return start_amplitude * normalized_time;
-        case Decay::EXPONENTIAL: return start_amplitude * (1.0f - std::expf(-5.0f * normalized_time));
-        case Decay::QUADRATIC:   return start_amplitude * std::pow(normalized_time, 2);
+        case Decay::EXPONENTIAL: return start_amplitude * (1.0 - std::exp(-5.0 * normalized_time));
+        case Decay::QUADRATIC:   return start_amplitude * std::pow(normalized_time, 2.0);
+        default: 
+            return start_amplitude * normalized_time;
         }
     }
 

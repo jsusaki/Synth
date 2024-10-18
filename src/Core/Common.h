@@ -48,6 +48,6 @@ using qf64 = glm::f64quat;
 const u32 SCREEN_WIDTH = 1600;
 const u32 SCREEN_HEIGHT = 720;
 
-static const f32 PI = 3.14159265358979323846f;
-static const f32 SAMPLE_RATE = 44100.0f;
+static const f64 PI = 3.14159265358979323846;
+static const f64 SAMPLE_RATE = 44100.0;
 static const u32 CHANNELS = 2;

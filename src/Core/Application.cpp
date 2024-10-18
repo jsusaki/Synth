@@ -79,7 +79,7 @@ void Application::Create()
 }
 
 // TODO: incorporate in audio control
-void Application::ProcessNoteInput(f32 time, s32 key, u32 note_id, std::vector<note>& notes)
+void Application::ProcessNoteInput(f64 time, s32 key, u32 note_id, std::vector<note>& notes)
 {
     Input& input = Input::Instance();
 
@@ -187,32 +187,42 @@ void Application::ProcessInput()
     if (input.IsKeyPressed(GLFW_KEY_KP_ADD))       osc1_volume += 0.1f;
     if (input.IsKeyPressed(GLFW_KEY_KP_SUBTRACT))  osc1_volume -= 0.1f;
     m_audio.synth.GetOscillator("OSC1").SetVolume(osc1_volume);
+    
+    // Waveform Control
+    if (input.IsKeyPressed(GLFW_KEY_1)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SINE);
+    if (input.IsKeyPressed(GLFW_KEY_2)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SQUARE);
+    if (input.IsKeyPressed(GLFW_KEY_3)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::TRIANGLE);
+    if (input.IsKeyPressed(GLFW_KEY_4)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SAWTOOTH);
+    if (input.IsKeyPressed(GLFW_KEY_5)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::ANALOG_SAWTOOTH);
 
-    if (input.IsKeyPressed(GLFW_KEY_Q)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SINE);
-    if (input.IsKeyPressed(GLFW_KEY_W)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SQUARE);
-    if (input.IsKeyPressed(GLFW_KEY_E)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::TRIANGLE);
-    if (input.IsKeyPressed(GLFW_KEY_R)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SAWTOOTH);
-    if (input.IsKeyPressed(GLFW_KEY_T)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::ANALOG_SAWTOOTH);
+    // Envelope Curve Control
+    if (input.IsKeyPressed(GLFW_KEY_Q))
+    {
+        m_audio.synth.m_envelope.attack_phase  = Envelope::Decay::LINEAR;
+        m_audio.synth.m_envelope.decay_phase   = Envelope::Decay::LINEAR;
+        m_audio.synth.m_envelope.release_phase = Envelope::Decay::LINEAR;
+    }
+    if (input.IsKeyPressed(GLFW_KEY_W))
+    {
+        m_audio.synth.m_envelope.attack_phase  = Envelope::Decay::EXPONENTIAL;
+        m_audio.synth.m_envelope.decay_phase   = Envelope::Decay::EXPONENTIAL;
+        m_audio.synth.m_envelope.release_phase = Envelope::Decay::EXPONENTIAL;
+    }
+    if (input.IsKeyPressed(GLFW_KEY_E))
+    {
+        m_audio.synth.m_envelope.attack_phase  = Envelope::Decay::QUADRATIC;
+        m_audio.synth.m_envelope.decay_phase   = Envelope::Decay::QUADRATIC;
+        m_audio.synth.m_envelope.release_phase = Envelope::Decay::QUADRATIC;
+    }
+
     if (input.IsKeyPressed(GLFW_KEY_TAB)) notes.clear();
 
     if (!m_gui.IsWindowFocused())
     {
-        if (input.IsButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
-        {
-
-        }
-        if (input.IsButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE))
-        {
-
-        }
-        if (input.IsButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
-        {
-
-        }
-        if (input.GetMouseWheel() != 0)
-        {
-            input.ResetMouseWheel();
-        }
+        if (input.IsButtonPressed(GLFW_MOUSE_BUTTON_LEFT))   {}
+        if (input.IsButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {}
+        if (input.IsButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {}
+        if (input.GetMouseWheel() != 0) { input.ResetMouseWheel(); }
     }
 
     // Update input state

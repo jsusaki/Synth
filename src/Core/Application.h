@@ -32,7 +32,7 @@ private: // Main functions
 
 private: // Helper functions
     void UpdateFrameTime();
-    void ProcessNoteInput(f32 time, s32 key, u32 note_id, std::vector<note>& notes);
+    void ProcessNoteInput(f64 time, s32 key, u32 note_id, std::vector<note>& notes);
 
 private: // Internal
     // Timing

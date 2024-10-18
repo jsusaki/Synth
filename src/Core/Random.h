@@ -8,10 +8,10 @@
 class random
 {
 public:
-	random(size_t seed = std::random_device{}()) : mt(seed) {}
+	random(u32 seed = std::random_device{}()) : mt(seed) {}
 
 public:
-	void seed(std::optional<size_t> seed = std::nullopt)
+	void seed(std::optional<u32> seed = std::nullopt)
 	{
 		if (seed.has_value()) 
 		{

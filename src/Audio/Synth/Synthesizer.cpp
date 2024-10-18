@@ -81,7 +81,7 @@ std::unordered_map<std::string, Oscillator>& Synthesizer::GetOscillators()
     return oscillators;
 }
 
-WaveData& const Synthesizer::GetWaveData()
+const WaveData& Synthesizer::GetWaveData()
 {
     return wave_data;
 }

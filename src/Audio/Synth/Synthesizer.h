@@ -115,7 +115,7 @@ public:
 	f64 GetMasterVolume();
 
 	std::vector<note>& GetNotes();
-	WaveData& const GetWaveData();
+	const WaveData& GetWaveData();
 	void UpdateWaveData(u32 frame, f64 sample);
 
 	Oscillator& GetOscillator(std::string id);
