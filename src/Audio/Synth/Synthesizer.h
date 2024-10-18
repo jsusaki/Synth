@@ -64,21 +64,21 @@
 #include "../../Core/Common.h"
 #include "Oscillator.h"
 #include "Envelope.h"
-#include "../../ref/ADSR/ADSR.h"
 
 // FEATURES
 	// TODO: Low-Frequency Oscillator
 	// TODO: Filters: Low Pass Filter, High Pass Filter
 	// TODO: Effects: Reverb, Chorus, Delay
-	// TODO: Modular Synthesizer (patch)
+	// TODO: Modular Synthesizer (module, patch)
 	// TODO: Sequencer
 	// TODO: Spectrogram (FFT)
 	// TODO: .wav Playback
-	// TODO: Midi
+	// TODO: Midi Playback
+	// TODO: Track
+	// TODO: Recording
 
 // IMPROVEMENTS
 	// TODO: Oscilloscope Improvement
-	// TODO: Graphical User Interface Improvement
 
 // BUGS
 	// KNOWN BUG: Sine Wave Clipping in ADSR: Release to Attack
@@ -96,6 +96,7 @@
 	// DONE: Midi Keyboard
 	// DONE: Envelope ADSR Visualization
 	// SOLVED BUG: After some time running the program, it introduces noise (buffer overflow?)
+	// DONE: Oscilloscope Interface
 
 struct WaveData
 {
@@ -104,8 +105,6 @@ struct WaveData
 	std::vector<f64> times;
 	std::vector<f64> samples;
 };
-
-//#define ENVELOPE_TEST
 
 // Modular Synthesizer
 class Synthesizer
@@ -135,16 +134,12 @@ public:
 	f64 max_frequency = 20000.0;
 	bool m_playing = true;
 
+	// Notes
 	std::vector<note> notes;
 
 	// Modules
 	std::unordered_map<std::string, Oscillator> oscillators;
-
-#ifdef ENVELOPE_TEST
-	ADSR m_adsr;
-#else
 	Envelope m_envelope;
-#endif
 
 	// Sample Buffer for visualization
 	WaveData wave_data;

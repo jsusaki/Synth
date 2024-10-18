@@ -11,28 +11,12 @@ Synthesizer::Synthesizer()
     // TODO: where do we get sample blocks from?
     wave_data.times.resize(SAMPLE_RATE/100, 0.0);
     wave_data.samples.resize(SAMPLE_RATE/100, 0.0);
-
-#ifdef ENVELOPE_TEST
-    // Configure ADSR
-    m_adsr.SetAttackRate(1.5   );
-    m_adsr.SetDecayRate(0.8    );
-    m_adsr.SetSustainLevel(1.0 );
-    m_adsr.SetReleaseRate(1.3  );
-    m_adsr.SetTargetRatioA(0.3);
-    m_adsr.SetTargetRatioDR(0.0001);
-#endif    
 }
 
 f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
 {
-#ifdef ENVELOPE_TEST
-    if (n.on > n.off) m_adsr.Gate(1);
-    else              m_adsr.Gate(0);
-    f64 envelope_amplitude = m_adsr.Process();
-#else
     // Envelope
     f64 envelope_amplitude = m_envelope.Amplitude(time_step, n.on, n.off);
-#endif    
     if (envelope_amplitude <= 0.0) note_finished = true;
 
     // Oscillator

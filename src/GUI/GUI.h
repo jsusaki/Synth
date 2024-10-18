@@ -196,29 +196,6 @@ public:
         ImVec2 plot_size(500, 300);
         ImGui::Begin("Envelope Generator");
         {
-#ifdef ENVELOPE_TEST
-            ImGui::Text(" A   D   S   R   AR  DRR");
-            VSliderDouble("##A", slider_size, &synth.m_adsr.attack_rate, 0.0, 10.0);  ImGui::SameLine();
-            VSliderDouble("##D", slider_size, &synth.m_adsr.decay_rate, 0.0, 10.0);   ImGui::SameLine();
-            VSliderDouble("##S", slider_size, &synth.m_adsr.sustain_level, 0.0, 1.0); ImGui::SameLine();
-            VSliderDouble("##R", slider_size, &synth.m_adsr.release_rate, 0.0, 10.0); ImGui::SameLine();
-            VSliderDouble("##AR", slider_size, &synth.m_adsr.target_ratio_attack, 0.0, 1.0); ImGui::SameLine();
-            VSliderDouble("##DRR", slider_size, &synth.m_adsr.target_ratio_decay_release, 0.0, 10.0); ImGui::SameLine();
-
-            s32 num_points = 1000;
-            std::vector<f64> as(num_points, 0.0);
-            std::vector<f64> ts(num_points, 0.0);
-            synth.m_adsr.Reset();
-            synth.m_adsr.Gate(1);
-            for (s32 i = 0; i < num_points; i++)
-            {
-                if (i == 600) synth.m_adsr.Gate(0);
-
-                f64 amplitude = synth.m_adsr.Process();
-                as[i] = amplitude;
-                ts[i] = i;
-            }
-#else
             ImGui::Text(" A   D   S   R");
             VSliderDouble("##A", slider_size, &synth.m_envelope.attack_time, 0.0, 10.0);      ImGui::SameLine();
             VSliderDouble("##D", slider_size, &synth.m_envelope.decay_time, 0.0, 10.0);       ImGui::SameLine();
@@ -245,7 +222,7 @@ public:
 
                 global_time += t;
             }
-#endif
+
             static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
             if (ImPlot::BeginPlot("ADSR Envelope", ImVec2(plot_size)))
             {
