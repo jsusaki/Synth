@@ -75,9 +75,6 @@
     <ClCompile Include="src\Audio\Synth\Synthesizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ref\ADSR\ADSR.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Core\Application.h">

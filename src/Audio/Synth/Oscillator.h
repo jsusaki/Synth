@@ -3,9 +3,6 @@
 #include "../../Core/Common.h"
 #include "Wave.h"
 #include "Note.h"
-#include "Envelope.h"
-
-#include "../../../ref/ADSR/ADSR.h"
 
 struct Oscillator
 {
@@ -19,8 +16,8 @@ public:
         SINE,
         SQUARE,
         TRIANGLE,
-        SAWTOOTH,
-        ANALOG_SAWTOOTH,
+        DIGI_SAWTOOTH,
+        ANLG_SAWTOOTH,
     };
 
     // TODO: Add Noises
@@ -35,7 +32,7 @@ public:
     // TODO: custom function
     f64 GenerateWave(f64 time_step, note n)
     {
-        SetNote(n.id);
+        SetNote(n.id + pitch);
 
         switch (m_waveform)
         {
@@ -48,10 +45,10 @@ public:
         case Type::TRIANGLE:
             m_output = m_wave.amplitude * std::asin(std::sin(2.0 * PI * m_wave.frequency * time_step));
             break;
-        case Type::SAWTOOTH:
+        case Type::DIGI_SAWTOOTH:
             m_output = m_wave.amplitude * (2.0 / PI) * (m_wave.frequency * PI * fmod(time_step, 1.0f / m_wave.frequency) - (PI / 2.0f));
             break;
-        case Type::ANALOG_SAWTOOTH:
+        case Type::ANLG_SAWTOOTH:
         {
             f64 acc = 0.0;
             for (f64 n = 1.0; n < 50.0; n++)
@@ -87,7 +84,7 @@ public:
         case Type::TRIANGLE:
             m_output = m_wave.amplitude * (m_phase_acc < 1.0) ? (m_phase_acc * 0.5) : (1.0 - m_phase_acc * 0.5);
             break;
-        case Type::SAWTOOTH:
+        case Type::DIGI_SAWTOOTH:
             m_output = m_wave.amplitude * (m_phase_acc - 1.0) * 2.0;
             break;
         default:
@@ -105,6 +102,7 @@ public:
 
 public:
     f64 volume      = 1.0;
+    s32 pitch       = 0;
     f64 m_output    = 0.0;
     Type m_waveform = Type::SINE;
     Wave m_wave;
@@ -123,8 +121,8 @@ static std::string wave_str(Oscillator::Type type)
     case Oscillator::Type::SINE:     n = "SINE";     break;
     case Oscillator::Type::SQUARE:   n = "SQUARE";   break;
     case Oscillator::Type::TRIANGLE: n = "TRIANGLE"; break;
-    case Oscillator::Type::SAWTOOTH: n = "SAWTOOTH"; break;
-    case Oscillator::Type::ANALOG_SAWTOOTH: n = "ANALOG SAWTOOTH"; break;
+    case Oscillator::Type::DIGI_SAWTOOTH: n = "SAWTOOTH"; break;
+    case Oscillator::Type::ANLG_SAWTOOTH: n = "ANALOG SAWTOOTH"; break;
     }
     return n;
 }

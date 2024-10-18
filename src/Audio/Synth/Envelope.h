@@ -25,10 +25,9 @@ struct Envelope
         switch (mode)
         {
         case Decay::LINEAR:      return start_amplitude * normalized_time;
-        case Decay::EXPONENTIAL: return start_amplitude * (1.0 - std::exp(-5.0 * normalized_time));
         case Decay::QUADRATIC:   return start_amplitude * std::pow(normalized_time, 2.0);
-        default: 
-            return start_amplitude * normalized_time;
+        case Decay::EXPONENTIAL: return start_amplitude * (1.0 - std::exp(-5.0 * normalized_time));
+        default:                 return start_amplitude * normalized_time;
         }
     }
 

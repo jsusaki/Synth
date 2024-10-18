@@ -180,7 +180,6 @@
     <ClCompile Include="lib\imgui\implot_demo.cpp" />
     <ClCompile Include="lib\imgui\implot_items.cpp" />
     <ClCompile Include="lib\imgui\misc\cpp\imgui_stdlib.cpp" />
-    <ClCompile Include="ref\ADSR\ADSR.cpp" />
     <ClCompile Include="src\Audio\Driver\AudioDriver.cpp" />
     <ClCompile Include="src\Audio\AudioEngine.cpp" />
     <ClCompile Include="src\Audio\Synth\Synthesizer.cpp" />

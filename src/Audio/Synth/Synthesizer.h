@@ -39,15 +39,15 @@
 		Wiki, Modular Synthesizer: https://en.wikipedia.org/wiki/Modular_synthesizer
 		Chiptune: https://en.wikipedia.org/wiki/Chiptune
 
+	Synthesizer
+		Synth1: https://daichilab.sakura.ne.jp/softsynth/index.html
+		GB SFX Generator: https://patchworkgames.itch.io/gbsfx
+
 	Reference Implementations
 		https://github.com/OneLoneCoder/synth
 		https://github.com/gsliepen/modsynth/tree/main
 		https://github.com/OneLoneCoder/olcSoundWaveEngine
 		https://github.com/jan-van-bergen/Synth
-
-	Synthesizer
-		Synth1: https://daichilab.sakura.ne.jp/softsynth/index.html
-		GB SFX Generator: https://patchworkgames.itch.io/gbsfx
 
 	Driver Backend
 		miniaudio: https://github.com/mackron/miniaudio
@@ -63,17 +63,18 @@
 
 #include "../../Core/Common.h"
 #include "Oscillator.h"
-
+#include "Envelope.h"
+#include "../../ref/ADSR/ADSR.h"
 
 // FEATURES
-	// TODO: Envelope ADSR Visualization
 	// TODO: Low-Frequency Oscillator
-	// TODO: Filters
-	// TODO: Effects
-	// TODO: Modular Synthesizer
+	// TODO: Filters: Low Pass Filter, High Pass Filter
+	// TODO: Effects: Reverb, Chorus, Delay
+	// TODO: Modular Synthesizer (patch)
 	// TODO: Sequencer
 	// TODO: Spectrogram (FFT)
-	// TODO: Playback
+	// TODO: .wav Playback
+	// TODO: Midi
 
 // IMPROVEMENTS
 	// TODO: Oscilloscope Improvement
@@ -81,12 +82,20 @@
 
 // BUGS
 	// KNOWN BUG: Sine Wave Clipping in ADSR: Release to Attack
-	// KNOWN BUG: After some time running the program, it introduces noise (buffer overflow?)
 
 // DONE
-	// DONE: Midi Keyboard
-	// DONE: Envelope Control
+	// DONE: Audio Driver
+	// DONE: Wave
+	// DONE: Oscillator	
+	// DONE: Waveforms: SINE, SQUARE, TRIANGLE, SAWTOOTH
+	// DONE: Oscilloscope
+	// DONE: ADSR Envelope
 	// DONE: Polyphony
+	// DONE: Envelope Control
+	// DONE: Volume Control
+	// DONE: Midi Keyboard
+	// DONE: Envelope ADSR Visualization
+	// SOLVED BUG: After some time running the program, it introduces noise (buffer overflow?)
 
 struct WaveData
 {
@@ -130,12 +139,14 @@ public:
 
 	// Modules
 	std::unordered_map<std::string, Oscillator> oscillators;
-	Envelope m_envelope;
 
 #ifdef ENVELOPE_TEST
 	ADSR m_adsr;
+#else
+	Envelope m_envelope;
 #endif
-	// Sample Buffer
+
+	// Sample Buffer for visualization
 	WaveData wave_data;
 };
 
