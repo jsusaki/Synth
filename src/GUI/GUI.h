@@ -42,6 +42,16 @@ struct ScrollingBuffer
     }
 };
 
+static bool SliderDouble(const char* label, double* v, double v_min, double v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0)
+{
+    return ImGui::SliderScalar(label, ImGuiDataType_Double, v, &v_min, &v_max, format, flags);
+}
+
+static bool VSliderDouble(const char* label, const ImVec2& size, double* v, double v_min, double v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0)
+{
+    return ImGui::VSliderScalar(label, size, ImGuiDataType_Double, v, &v_min, &v_max, format, flags);
+}
+
 static std::pair<std::vector<f32>, std::vector<f32>> ComputeEnvelopeCurve(Envelope& envelope, f32 duration, s32 num_points)
 {
     std::vector<f32> as;
@@ -120,9 +130,9 @@ public:
             ImGui::Begin("Mixer");
             {
                 ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.25f);
-                ImGui::SliderFloat("Master Volume", &synth.m_master_volume, 0.0f, 1.0f);
                 ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.25f);
-                ImGui::SliderFloat("OSC 1 Volume", &synth.GetOscillator("OSC1").volume, 0.0f, 1.0f);
+                SliderDouble("Master Volume", &synth.m_master_volume, 0.0, 1.0);
+                SliderDouble("OSC 1 Volume", &synth.GetOscillator("OSC1").volume, 0.0, 1.0);
             }
             ImGui::End();
 
@@ -132,10 +142,10 @@ public:
             ImGui::Begin("Envelope Generator");
             {
                 ImGui::Text(" A   D   S   R");
-                ImGui::VSliderFloat("##A", slider_size, &synth.m_envelope.attack_time,       0.0f, 10.0f); ImGui::SameLine();
-                ImGui::VSliderFloat("##D", slider_size, &synth.m_envelope.decay_time,        0.0f, 10.0f); ImGui::SameLine();
-                ImGui::VSliderFloat("##S", slider_size, &synth.m_envelope.sustain_amplitude, 0.0f, 1.0f);  ImGui::SameLine();
-                ImGui::VSliderFloat("##R", slider_size, &synth.m_envelope.release_time,      0.0f, 10.0f); ImGui::SameLine();
+                VSliderDouble("##A", slider_size, &synth.m_envelope.attack_time,       0.0, 10.0); ImGui::SameLine();
+                VSliderDouble("##D", slider_size, &synth.m_envelope.decay_time,        0.0, 10.0); ImGui::SameLine();
+                VSliderDouble("##S", slider_size, &synth.m_envelope.sustain_amplitude, 0.0, 1.0);  ImGui::SameLine();
+                VSliderDouble("##R", slider_size, &synth.m_envelope.release_time,      0.0, 10.0); ImGui::SameLine();
             
                 s32 num_points    = 1000;
                 f32 time_step     = 1 / SAMPLE_RATE;

@@ -4,15 +4,15 @@
 
 struct Wave
 {
-    f32 amplitude;
-    f32 frequency;
+    f64 amplitude;
+    f64 frequency;
 
-    Wave(f32 amp = 1.0f, f32 freq = 110.0f)
+    Wave(f64 amp = 1.0, f64 freq = 110.0)
     {
         SetAmplitude(amp);
         SetFrequency(freq);
     }
 
-    void SetAmplitude(f32 amp)  { amplitude = std::clamp(amp, -1.0f, 1.0f); }
-    void SetFrequency(f32 freq) { frequency = std::clamp(freq, 0.0f, 20000.0f); }
+    void SetAmplitude(f64 amp)  { amplitude = std::clamp(amp, -1.0, 1.0); }
+    void SetFrequency(f64 freq) { frequency = std::clamp(freq, 0.0, 20000.0); }
 };

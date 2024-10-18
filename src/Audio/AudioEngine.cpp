@@ -36,15 +36,15 @@ void AudioEngine::Shutdown()
     m_driver->Close();
 }
 
-std::vector<f32>& AudioEngine::ProcessOutputBlock(u32 frame_count)
+std::vector<f64>& AudioEngine::ProcessOutputBlock(u32 frame_count)
 {
     for (u32 frame = 0; frame < frame_count; frame++)
     {
         // TODO: clean up; synth note may go inside synth, and return a buffer of mixed outputs
-        f32 mixed_output = 0.0f;
+        f64 mixed_output = 0.0f;
         for (auto& n : synth.notes)
         {
-            f32 sample = 0.0f;
+            f64 sample = 0.0f;
             bool note_finished = false;
 
             sample = synth.Synthesize(m_global_time, n, note_finished);
@@ -56,7 +56,7 @@ std::vector<f32>& AudioEngine::ProcessOutputBlock(u32 frame_count)
         }
         
         // TODO: review mixing method: do we need to normalize?
-        mixed_output = std::clamp(mixed_output, -1.0f, 1.0f);
+        mixed_output = std::clamp(mixed_output, -1.0, 1.0);
         synth.UpdateWaveData(frame, mixed_output);
 
         // Update time

@@ -133,14 +133,14 @@ void MiniAudio::Stop()
 void MiniAudio::FillOutputBuffer(void* pOutput, u32 frameCount)
 {
     // Generate mixed samples for sound card
-    std::vector<f32>& mixed_outputs = m_host->ProcessOutputBlock(frameCount);
+    std::vector<f64>& mixed_outputs = m_host->ProcessOutputBlock(frameCount);
     u32 channels = m_host->Channels();
 
     // Fill output buffer with mixed samples for each channel, interleaved
     f32* pFramesOutF32 = (f32*)pOutput;
     for (u32 frame = 0; frame < frameCount; frame++)
     {
-        f32 mixed_output = mixed_outputs[frame];
+        f32 mixed_output = static_cast<f32>(mixed_outputs[frame]);
         for (u32 channel = 0; channel < channels; channel++)
             pFramesOutF32[frame * channels + channel] = mixed_output;
     }

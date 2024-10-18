@@ -92,9 +92,11 @@ struct WaveData
 {
 	Wave wave;
 	Oscillator::Type waveform;
-	std::vector<f32> times;
-	std::vector<f32> samples;
+	std::vector<f64> times;
+	std::vector<f64> samples;
 };
+
+//#define ENVELOPE_TEST
 
 // Modular Synthesizer
 class Synthesizer
@@ -103,25 +105,25 @@ public:
 	Synthesizer();
 
 public:
-	f32 Synthesize(f32 time_step, note n, bool& note_finished);
+	f64 Synthesize(f64 time_step, note n, bool& note_finished);
 	void Update(f64 time);
 
 public:
 	void PlayToggle();
 	bool IsPlaying();
-	void SetMasterVolume(f32 volume);
-	f32 GetMasterVolume();
+	void SetMasterVolume(f64 volume);
+	f64 GetMasterVolume();
 
 	std::vector<note>& GetNotes();
 	WaveData& const GetWaveData();
-	void UpdateWaveData(u32 frame, f32 sample);
+	void UpdateWaveData(u32 frame, f64 sample);
 
 	Oscillator& GetOscillator(std::string id);
 	std::unordered_map<std::string, Oscillator>& GetOscillators();
 
 public:
-	f32 m_master_volume = 0.5f;
-	f32 max_frequency = 20000.0f;
+	f64 m_master_volume = 0.5;
+	f64 max_frequency = 20000.0;
 	bool m_playing = true;
 
 	std::vector<note> notes;
@@ -129,8 +131,10 @@ public:
 	// Modules
 	std::unordered_map<std::string, Oscillator> oscillators;
 	Envelope m_envelope;
+
+#ifdef ENVELOPE_TEST
 	ADSR m_adsr;
-	
+#endif
 	// Sample Buffer
 	WaveData wave_data;
 };

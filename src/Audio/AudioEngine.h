@@ -50,7 +50,7 @@ private: // Audio Engine Internal
 
 private: // Audio Driver Internal
     // Generate samples for FillOutputBuffer in AudioDriver
-    std::vector<f32>& ProcessOutputBlock(u32 frame_count);
+    std::vector<f64>& ProcessOutputBlock(u32 frame_count);
     // Audio Driver
     std::unique_ptr<AudioDriver> m_driver;
 };

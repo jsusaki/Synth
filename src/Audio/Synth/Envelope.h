@@ -3,16 +3,16 @@
 
 struct Envelope
 {
-    f32 attack_time;       // time
-    f32 decay_time;        // time
-    f32 sustain_amplitude; // amplitude
-    f32 release_time;      // time
-    f32 start_amplitude;   // initial amplitude
+    f64 attack_time;       // time
+    f64 decay_time;        // time
+    f64 sustain_amplitude; // amplitude
+    f64 release_time;      // time
+    f64 start_amplitude;   // initial amplitude
 
     // do we need this?
-    f32 attack_rate; 
-    f32 decay_rate;  
-    f32 release_rate;
+    f64 attack_rate; 
+    f64 decay_rate;  
+    f64 release_rate;
 
     enum class Decay : u8
     {
@@ -49,26 +49,26 @@ struct Envelope
     }
 
     // TODO: State Machine Approach?
-    f32 Amplitude(const f32 time_step, const f32 time_on, const f32 time_off)
+    f64 Amplitude(const f64 time_step, const f64 time_on, const f64 time_off)
     {
-        f32 amplitude_output  = 0.0;
-        f32 release_amplitude = 0.0;
+        f64 amplitude_output  = 0.0;
+        f64 release_amplitude = 0.0;
 
         if (time_on > time_off) // Note is on
         {
-            f32 lifetime = time_step - time_on;
+            f64 lifetime = time_step - time_on;
 
             // Attack phase
             if (lifetime <= attack_time)
             {
-                f32 nt = lifetime / attack_time;
+                f64 nt = lifetime / attack_time;
                 amplitude_output = CalculateDecay(nt, start_amplitude, attack_phase);
             }
             // Decay phase
             else if (lifetime > attack_time && lifetime <= (attack_time + decay_time))
             {
-                f32 nt = (lifetime - attack_time) / decay_time;
-                f32 a  = sustain_amplitude - start_amplitude;
+                f64 nt = (lifetime - attack_time) / decay_time;
+                f64 a  = sustain_amplitude - start_amplitude;
                 amplitude_output = CalculateDecay(nt, a, decay_phase) + start_amplitude;
             }
             // Sustain phase
@@ -80,19 +80,19 @@ struct Envelope
         }
         else // Note is off
         {
-            f32 lifetime = time_off - time_on;
+            f64 lifetime = time_off - time_on;
 
             // Release in attack
             if (lifetime <= attack_time)
             {
-                f32 nt = lifetime / attack_time;
+                f64 nt = lifetime / attack_time;
                 release_amplitude = CalculateDecay(nt, start_amplitude, attack_phase);
             }
             // Release in decay
             else if (lifetime > attack_time && lifetime <= (attack_time + decay_time))
             {
-                f32 nt = (lifetime - attack_time) / decay_time;
-                f32 a  = (sustain_amplitude - start_amplitude);
+                f64 nt = (lifetime - attack_time) / decay_time;
+                f64 a  = (sustain_amplitude - start_amplitude);
                 release_amplitude = CalculateDecay(nt, a, decay_phase) + start_amplitude;
             }
             // Release in sustain
@@ -102,13 +102,13 @@ struct Envelope
             }
 
             // Release phase
-            f32 nt = (time_step - time_off) / release_time;
-            f32 a = 0.0 - release_amplitude;
+            f64 nt = (time_step - time_off) / release_time;
+            f64 a = 0.0 - release_amplitude;
             amplitude_output = CalculateDecay(nt, a, release_phase) + release_amplitude;
         }
         
         // Amplitude should not be negative
-        amplitude_output = std::clamp(amplitude_output, 0.0f, 1.0f);
+        amplitude_output = std::clamp(amplitude_output, 0.0, 1.0);
         return amplitude_output;
     }
 };

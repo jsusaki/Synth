@@ -146,9 +146,9 @@ void Application::ProcessInput()
     }
 
     // Control variables
-    static f32 master_volume = 0.5f;
+    static f64 master_volume = 0.5f;
     static s32 octave = 4*12;
-    static f32 osc1_volume = 0.5f;
+    static f64 osc1_volume = 0.5f;
 
     f64 time_step = m_audio.Timestep();
     std::vector<note>& notes = m_audio.synth.GetNotes();
@@ -192,7 +192,8 @@ void Application::ProcessInput()
     if (input.IsKeyPressed(GLFW_KEY_W)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SQUARE);
     if (input.IsKeyPressed(GLFW_KEY_E)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::TRIANGLE);
     if (input.IsKeyPressed(GLFW_KEY_R)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::SAWTOOTH);
-    if (input.IsKeyPressed(GLFW_KEY_T)) notes.clear();
+    if (input.IsKeyPressed(GLFW_KEY_T)) m_audio.synth.GetOscillator("OSC1").SetWaveform(Oscillator::Type::ANALOG_SAWTOOTH);
+    if (input.IsKeyPressed(GLFW_KEY_TAB)) notes.clear();
 
     if (!m_gui.IsWindowFocused())
     {
