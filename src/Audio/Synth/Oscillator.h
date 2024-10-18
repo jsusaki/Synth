@@ -7,8 +7,6 @@
 
 #include "../../../ref/ADSR/ADSR.h"
 
-const f32 SAMPLE_RATE2 = 44100.0f;
-
 struct Oscillator
 {
 public:
@@ -67,7 +65,7 @@ public:
         SetNote(n.id);
 
         //m_phase_acc += m_wave.frequency * time_step;
-        m_phase_acc += m_wave.frequency / SAMPLE_RATE2;
+        m_phase_acc += m_wave.frequency / SAMPLE_RATE;
         if (m_phase_acc >= 2.0) m_phase_acc -= 2.0;
 
         switch (m_waveform)

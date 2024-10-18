@@ -64,18 +64,29 @@
 #include "../../Core/Common.h"
 #include "Oscillator.h"
 
-// DONE: Envelope Control
-// DONE: Polyphony
 
-// BUG: Sine Wave Clipping in ADSR: Release to Attack
-// TODO: Envelope ADSR Visualization
-// TODO: Modular Synthesizer
-// TODO: Sequencer
-// TODO: Spectrogram (FFT)
-// TODO: Playback
+// FEATURES
+	// TODO: Envelope ADSR Visualization
+	// TODO: Low-Frequency Oscillator
+	// TODO: Filters
+	// TODO: Effects
+	// TODO: Modular Synthesizer
+	// TODO: Sequencer
+	// TODO: Spectrogram (FFT)
+	// TODO: Playback
 
-// TODO: Oscilloscope Improvement
-// TODO: Graphical User Interface Improvement
+// IMPROVEMENTS
+	// TODO: Oscilloscope Improvement
+	// TODO: Graphical User Interface Improvement
+
+// BUGS
+	// KNOWN BUG: Sine Wave Clipping in ADSR: Release to Attack
+	// KNOWN BUG: After some time running the program, it introduces noise (buffer overflow?)
+
+// DONE
+	// DONE: Midi Keyboard
+	// DONE: Envelope Control
+	// DONE: Polyphony
 
 struct WaveData
 {

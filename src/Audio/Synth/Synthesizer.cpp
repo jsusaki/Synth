@@ -7,14 +7,14 @@ Synthesizer::Synthesizer()
     oscillators["OSC1"] = Oscillator(wave);
 
     // TODO: where do we get sample blocks from?
-    wave_data.times.resize(441, 0.0f);
-    wave_data.samples.resize(441, 0.0f);
+    wave_data.times.resize(SAMPLE_RATE/100, 0.0f);
+    wave_data.samples.resize(SAMPLE_RATE/100, 0.0f);
 
     // Configure ADSR
-    m_adsr.SetAttackRate(1.5 * SAMPLE_RATE2);
-    m_adsr.SetDecayRate(0.8 * SAMPLE_RATE2);
-    m_adsr.SetSustainLevel(1.0 * SAMPLE_RATE2);
-    m_adsr.SetReleaseRate(1.3 * SAMPLE_RATE2);
+    m_adsr.SetAttackRate(1.5   * SAMPLE_RATE);
+    m_adsr.SetDecayRate(0.8    * SAMPLE_RATE);
+    m_adsr.SetSustainLevel(1.0 * SAMPLE_RATE);
+    m_adsr.SetReleaseRate(1.3  * SAMPLE_RATE);
 }
 
 f32 Synthesizer::Synthesize(f32 time_step, note n, bool& note_finished)
@@ -23,12 +23,21 @@ f32 Synthesizer::Synthesize(f32 time_step, note n, bool& note_finished)
     //else              m_adsr.Gate(0);
     //f32 envAmp = m_adsr.Process();
 
-    f32 envAmp = m_envelope.Amplitude(time_step, n.on, n.off);
-    if (envAmp <= 0.0) note_finished = true;
+    // Envelope
+    f32 envelope_amplitude = m_envelope.Amplitude(time_step, n.on, n.off);
+    if (envelope_amplitude <= 0.0) note_finished = true;
+    
+    // Oscillator
     // if (n.channel == 0)
     f32 sound = oscillators["OSC1"].GenerateWave(time_step - n.on, n);
 
-    f32 output = std::clamp(envAmp * sound * m_master_volume, -1.0f, 1.0f);
+    // Low Frequency Oscillator
+
+    // Filter
+
+    // Effects
+
+    f32 output = std::clamp(envelope_amplitude * sound * m_master_volume, -1.0f, 1.0f);
 
     return output;
 }

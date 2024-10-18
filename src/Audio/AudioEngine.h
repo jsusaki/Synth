@@ -17,8 +17,6 @@
 #include "Driver/AudioDriver.h"
 #include "Synth/Synthesizer.h"
 
-const u32 CHANNELS = 2;
-const f32 SAMPLE_RATE = 44100.0f;
 
 class AudioEngine
 {
@@ -35,7 +33,7 @@ public: // Audio Engine Interface
     void Shutdown();
 
 public: // Accessors 
-    const f64 Time() const;
+    const f64 Timestep() const;
     const u32 SampleRate() const;
     const u32 Channels() const;
     const u32 Blocks() const;

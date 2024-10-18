@@ -9,6 +9,11 @@ struct Envelope
     f32 release_time;      // time
     f32 start_amplitude;   // initial amplitude
 
+    // do we need this?
+    f32 attack_rate; 
+    f32 decay_rate;  
+    f32 release_rate;
+
     enum class Decay : u8
     {
         LINEAR,
@@ -44,14 +49,14 @@ struct Envelope
     }
 
     // TODO: State Machine Approach?
-    f32 Amplitude(const f32 time, const f32 time_on, const f32 time_off)
+    f32 Amplitude(const f32 time_step, const f32 time_on, const f32 time_off)
     {
         f32 amplitude_output  = 0.0;
         f32 release_amplitude = 0.0;
 
         if (time_on > time_off) // Note is on
         {
-            f32 lifetime = time - time_on;
+            f32 lifetime = time_step - time_on;
 
             // Attack phase
             if (lifetime <= attack_time)
@@ -97,8 +102,8 @@ struct Envelope
             }
 
             // Release phase
-            f32 nt = (time - time_off) / release_time;
-            f32 a  = 0.0 - release_amplitude;
+            f32 nt = (time_step - time_off) / release_time;
+            f32 a = 0.0 - release_amplitude;
             amplitude_output = CalculateDecay(nt, a, release_phase) + release_amplitude;
         }
         

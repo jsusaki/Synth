@@ -150,28 +150,28 @@ void Application::ProcessInput()
     static s32 octave = 4*12;
     static f32 osc1_volume = 0.5f;
 
-    f64 time = m_audio.Time();
+    f64 time_step = m_audio.Timestep();
     std::vector<note>& notes = m_audio.synth.GetNotes();
 
     // Synth Control
     // Keyboard Control
-    ProcessNoteInput(time, GLFW_KEY_Z,        0+octave,    notes);
-    ProcessNoteInput(time, GLFW_KEY_S,        1+octave,    notes);
-    ProcessNoteInput(time, GLFW_KEY_X,        2+octave,    notes);
-    ProcessNoteInput(time, GLFW_KEY_D,        3+octave,    notes);
-    ProcessNoteInput(time, GLFW_KEY_C,        4+octave,    notes);
-    ProcessNoteInput(time, GLFW_KEY_V,        5+octave,    notes);
-    ProcessNoteInput(time, GLFW_KEY_G,        6+octave,    notes);
-    ProcessNoteInput(time, GLFW_KEY_B,        7+octave,    notes);
-    ProcessNoteInput(time, GLFW_KEY_H,        8+octave,    notes);
-    ProcessNoteInput(time, GLFW_KEY_N,        9+octave,    notes);
-    ProcessNoteInput(time, GLFW_KEY_J,        10+octave,   notes);
-    ProcessNoteInput(time, GLFW_KEY_M,        11+octave,   notes);
-    ProcessNoteInput(time, GLFW_KEY_COMMA,    0+octave+12, notes);
-    ProcessNoteInput(time, GLFW_KEY_L,        1+octave+12, notes);
-    ProcessNoteInput(time, GLFW_KEY_PERIOD,   2+octave+12, notes);
-    ProcessNoteInput(time, GLFW_KEY_SEMICOLON,3+octave+12, notes);
-    ProcessNoteInput(time, GLFW_KEY_SLASH,    4+octave+12, notes);
+    ProcessNoteInput(time_step, GLFW_KEY_Z,        0+octave,    notes);
+    ProcessNoteInput(time_step, GLFW_KEY_S,        1+octave,    notes);
+    ProcessNoteInput(time_step, GLFW_KEY_X,        2+octave,    notes);
+    ProcessNoteInput(time_step, GLFW_KEY_D,        3+octave,    notes);
+    ProcessNoteInput(time_step, GLFW_KEY_C,        4+octave,    notes);
+    ProcessNoteInput(time_step, GLFW_KEY_V,        5+octave,    notes);
+    ProcessNoteInput(time_step, GLFW_KEY_G,        6+octave,    notes);
+    ProcessNoteInput(time_step, GLFW_KEY_B,        7+octave,    notes);
+    ProcessNoteInput(time_step, GLFW_KEY_H,        8+octave,    notes);
+    ProcessNoteInput(time_step, GLFW_KEY_N,        9+octave,    notes);
+    ProcessNoteInput(time_step, GLFW_KEY_J,        10+octave,   notes);
+    ProcessNoteInput(time_step, GLFW_KEY_M,        11+octave,   notes);
+    ProcessNoteInput(time_step, GLFW_KEY_COMMA,    0+octave+12, notes);
+    ProcessNoteInput(time_step, GLFW_KEY_L,        1+octave+12, notes);
+    ProcessNoteInput(time_step, GLFW_KEY_PERIOD,   2+octave+12, notes);
+    ProcessNoteInput(time_step, GLFW_KEY_SEMICOLON,3+octave+12, notes);
+    ProcessNoteInput(time_step, GLFW_KEY_SLASH,    4+octave+12, notes);
 
     // Pitch Control
     if (input.IsKeyPressed(GLFW_KEY_LEFT))  octave -= 12;

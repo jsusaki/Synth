@@ -40,7 +40,7 @@ std::vector<f32>& AudioEngine::ProcessOutputBlock(u32 frame_count)
 {
     for (u32 frame = 0; frame < frame_count; frame++)
     {
-        // TODO: clean up; synth note may go inside, and return a buffer of mixed outputs
+        // TODO: clean up; synth note may go inside synth, and return a buffer of mixed outputs
         f32 mixed_output = 0.0f;
         for (auto& n : synth.notes)
         {
@@ -66,7 +66,7 @@ std::vector<f32>& AudioEngine::ProcessOutputBlock(u32 frame_count)
     return synth.wave_data.samples;
 }
 
-const f64 AudioEngine::Time() const
+const f64 AudioEngine::Timestep() const
 {
     return m_global_time;
 }
