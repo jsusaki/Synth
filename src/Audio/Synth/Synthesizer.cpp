@@ -20,11 +20,17 @@ Synthesizer::Synthesizer()
     };
 
     m_filter = {
-        .type             = Filter::Type::LOW_PASS,
-        .frequency = 1000.0,
+        .type             = BqFilter::Type::LOW_PASS,
+        .frequency        = 1000.0,
         .resonance        = 0.7,
         .sample_rate      = SAMPLE_RATE,
     };
+
+    m_vafilter = {
+        .type = VAFilter::Type::LOW_PASS,
+    };
+
+    m_vafilter.CalcCoefs(10000.0, 0.7);
 
     wave_data.times.resize(SAMPLE_RATE/100, 0.0);
     wave_data.samples.resize(SAMPLE_RATE/100, 0.0);
@@ -34,18 +40,23 @@ f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
 {
     // Envelope
     f64 envelope_amplitude = m_envelope.Amplitude(time_step, n.on, n.off);
-    if (envelope_amplitude <= 0.0001)
+    if (envelope_amplitude <= 0.00001)
+    {
         note_finished = true;
+        return 0.0;
+    }
+
     // Oscillator
     // if (n.channel == 0)
     f64 sound_mixed = 0.0;
     for (auto& [id, osc] : oscillators)
     {
         // Generate wave
-        f32 sound = osc.GenerateWave(time_step, n);
+        f64 sound = osc.GenerateWave(time_step, n);
 
         // Filter
-        sound = m_filter.FilterWave(sound);
+        //sound = m_filter.FilterWave(sound);
+        sound = m_vafilter.FilterWave(sound);
 
         // TODO: Low Frequency Oscillator
 

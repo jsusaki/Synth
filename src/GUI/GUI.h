@@ -283,29 +283,52 @@ public:
 
     void Filter(Synthesizer& synth)
     {
-        ImVec2 slider_size(20, 300);
+        ImVec2 slider_size(40, 300);
         ImGui::Begin("Filter");
         {
             static f64 resonance = 0.7;
-            static f64 cutoff_freq = 1000.0;
-            static s32 filter_type = static_cast<s32>(synth.m_filter.type);
+            static f64 cutoff_freq = 10000.0;
+            //static s32 filter_type = static_cast<s32>(synth.m_filter.type);
+            static s32 filter_type = static_cast<s32>(synth.m_vafilter.type);
+
+            // Store previous values
+            static f64 prev_resonance = resonance;
+            static f64 prev_cutoff_freq = cutoff_freq;
+            static s32 prev_filter_type = filter_type;
 
             ImGui::Text(" C   R"); ImGui::SameLine();
             ImGui::BeginGroup();   ImGui::SameLine();
-            ImGui::RadioButton("LPF",  &filter_type, static_cast<s32>(Filter::Type::LOW_PASS));   ImGui::SameLine();
-            ImGui::RadioButton("HPF",  &filter_type, static_cast<s32>(Filter::Type::HIGH_PASS));  ImGui::SameLine();
-            ImGui::RadioButton("BPF",  &filter_type, static_cast<s32>(Filter::Type::BAND_PASS));  ImGui::SameLine();
-            ImGui::RadioButton("APF",  &filter_type, static_cast<s32>(Filter::Type::ALL_PASS));   ImGui::SameLine();
-            ImGui::RadioButton("PEAK", &filter_type, static_cast<s32>(Filter::Type::PEAK));       ImGui::SameLine();
-            ImGui::RadioButton("NOTCH",&filter_type, static_cast<s32>(Filter::Type::NOTCH));      ImGui::SameLine();
-            ImGui::RadioButton("LSF",  &filter_type, static_cast<s32>(Filter::Type::LOW_SHELF));  ImGui::SameLine();
-            ImGui::RadioButton("HSF",  &filter_type, static_cast<s32>(Filter::Type::HIGH_SHELF)); ImGui::SameLine();
+            ImGui::RadioButton("LPF",  &filter_type, static_cast<s32>(VAFilter::Type::LOW_PASS));   ImGui::SameLine();
+            ImGui::RadioButton("HPF",  &filter_type, static_cast<s32>(VAFilter::Type::HIGH_PASS));  ImGui::SameLine();
+            ImGui::RadioButton("BPF",  &filter_type, static_cast<s32>(VAFilter::Type::BAND_PASS));  ImGui::SameLine();
+            ImGui::RadioButton("OFF",  &filter_type, static_cast<s32>(VAFilter::Type::OFF));        ImGui::SameLine();
+
+            //ImGui::RadioButton("LPF",  &filter_type, static_cast<s32>(Filter::Type::LOW_PASS));   ImGui::SameLine();
+            //ImGui::RadioButton("HPF",  &filter_type, static_cast<s32>(Filter::Type::HIGH_PASS));  ImGui::SameLine();
+            //ImGui::RadioButton("BPF",  &filter_type, static_cast<s32>(Filter::Type::BAND_PASS));  ImGui::SameLine();
+            //ImGui::RadioButton("APF",  &filter_type, static_cast<s32>(Filter::Type::ALL_PASS));   ImGui::SameLine();
+            //ImGui::RadioButton("PEAK", &filter_type, static_cast<s32>(Filter::Type::PEAK));       ImGui::SameLine();
+            //ImGui::RadioButton("NOTCH",&filter_type, static_cast<s32>(Filter::Type::NOTCH));      ImGui::SameLine();
+            //ImGui::RadioButton("LSF",  &filter_type, static_cast<s32>(Filter::Type::LOW_SHELF));  ImGui::SameLine();
+            //ImGui::RadioButton("HSF",  &filter_type, static_cast<s32>(Filter::Type::HIGH_SHELF)); ImGui::SameLine();
             ImGui::EndGroup();
 
             VSliderDouble("##F", slider_size, &cutoff_freq, 0.0, SAMPLE_RATE / 2.0); ImGui::SameLine();
             VSliderDouble("##R", slider_size, &resonance, 0.0, 2.0);                 ImGui::SameLine();
 
-            synth.m_filter.ComputeCoefficients(cutoff_freq, resonance);
+            if (resonance != prev_resonance || cutoff_freq != prev_cutoff_freq || filter_type != prev_filter_type)
+            {
+                synth.m_vafilter.type = static_cast<VAFilter::Type>(filter_type);
+
+                //synth.m_filter.CalcCoefs(cutoff_freq, resonance);
+                synth.m_vafilter.CalcCoefs(cutoff_freq, resonance);
+
+                // Update previous values
+                prev_resonance   = resonance;
+                prev_cutoff_freq = cutoff_freq;
+                prev_filter_type = filter_type;
+            }
+
 
             // TODO: Plot Frequency and Magnitude
             //s32 num_points  = 1000;

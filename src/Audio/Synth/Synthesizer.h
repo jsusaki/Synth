@@ -146,7 +146,8 @@ public:
 	// Modules
 	std::unordered_map<std::string, Oscillator> oscillators;
 	Envelope m_envelope;
-	Filter m_filter;
+	BqFilter m_filter;
+	VAFilter m_vafilter;
 
 	// Sample Buffer for visualization
 	WaveData wave_data;
