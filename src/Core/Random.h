@@ -5,6 +5,7 @@
 
 #include "Common.h"
 
+template <typename F, typename I>
 class random
 {
 public:
@@ -24,58 +25,58 @@ public:
 		}
 	}
 
-	inline f32 uniform(f32 min, f32 max)
+	inline F uniform(F min, F max)
 	{
-		std::uniform_real_distribution<f32>dist(min, max);
+		std::uniform_real_distribution<F>dist(min, max);
 		return dist(mt);
 	}
 
-	inline s32 uniformi(s32 min, s32 max)
+	inline I uniformi(I min, I max)
 	{
-		std::uniform_int_distribution<s32>dist(min, max);
+		std::uniform_int_distribution<I>dist(min, max);
 		return dist(mt);
 	}
 
-	inline f32 normal(f32 mu, f32 sigma)
+	inline F normal(F mu, F sigma)
 	{
-		std::normal_distribution<f32>dist(mu, sigma);
+		std::normal_distribution<F>dist(mu, sigma);
 		return dist(mt);
 	};
 
-	inline bool bernoulli(f32 p) 
+	inline bool bernoulli(F p) 
 	{
 		std::bernoulli_distribution dist(p);
 		return dist(mt);
 	}
 
-	inline std::vector<f32> uniform(f32 min, f32 max, u32 size)
+	inline std::vector<F> uniform(F min, F max, I size)
 	{
-		std::vector<f32> res(size);
-		for (u32 i = 0; i < res.size(); i++)
+		std::vector<F> res(size);
+		for (I i = 0; i < res.size(); i++)
 			res[i] = uniform(min, max);
 		return res;
 	}
 
-	inline std::vector<s32> uniformi(s32 min, s32 max, u32 size)
+	inline std::vector<I> uniformi(I min, I max, I size)
 	{
-		std::vector<s32> res(size);
-		for (u32 i = 0; i < res.size(); i++)
+		std::vector<I> res(size);
+		for (I i = 0; i < res.size(); i++)
 			res[i] = uniformi(min, max);
 		return res;
 	}
 
-	inline std::vector<f32> normal(f32 mu, f32 sigma, u32 size)
+	inline std::vector<F> normal(F mu, F sigma, I size)
 	{
-		std::vector<f32> res(size);
-		for (u32 i = 0; i < res.size(); i++)
+		std::vector<F> res(size);
+		for (I i = 0; i < res.size(); i++)
 			res[i] = normal(mu, sigma);
 		return res;
 	}
 
-	inline std::vector<f32> bernoulli(f32 p, u32 size)
+	inline std::vector<F> bernoulli(F p, I size)
 	{
-		std::vector<f32> res(size);
-		for (u32 i = 0; i < res.size(); i++)
+		std::vector<F> res(size);
+		for (I i = 0; i < res.size(); i++)
 			res[i] = bernoulli(p);
 		return res;
 	}
@@ -83,3 +84,6 @@ public:
 private:
 	std::mt19937 mt;
 };
+
+using randf32 = random<f32, s32>;
+using randf64 = random<f64, s32>;

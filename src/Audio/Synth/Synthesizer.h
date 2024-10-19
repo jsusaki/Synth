@@ -58,30 +58,36 @@
 		https://github.com/cycfi/q
 		https://github.com/libAudioFlux/audioFlux
 */
+#pragma once
+
 #include <vector>
 #include <unordered_map>
 
 #include "../../Core/Common.h"
+
 #include "Oscillator.h"
 #include "Envelope.h"
+#include "Filter.h"
 
 // FEATURES
-	// TODO: Low-Frequency Oscillator
 	// TODO: Filters: Low Pass Filter, High Pass Filter
+
+	// TODO: Low-Frequency Oscillator
 	// TODO: Effects: Reverb, Chorus, Delay
 	// TODO: Modular Synthesizer (module, patch)
 	// TODO: Sequencer
 	// TODO: Spectrogram (FFT)
-	// TODO: .wav Playback
-	// TODO: Midi Playback
+	// TODO: .wav support
+	// TODO: .midi support
 	// TODO: Track
 	// TODO: Recording
 
 // IMPROVEMENTS
-	// TODO: Oscilloscope Improvement
+	// TODO: Oscilloscope improvement
+	// TODO: Filter graph improvement
 
 // BUGS
-	// KNOWN BUG: Sine Wave Clipping in ADSR: Release to Attack
+	// KNOWN BUG: Sine Wave Clipping in ADSR: Release to Attack; sound engineering problem: attenuate with filter
 
 // DONE
 	// DONE: Audio Driver
@@ -117,7 +123,7 @@ public:
 	void Update(f64 time);
 
 public:
-	void PlayToggle();
+	void TogglePlay();
 	bool IsPlaying();
 	void SetMasterVolume(f64 volume);
 	f64 GetMasterVolume();
@@ -140,8 +146,8 @@ public:
 	// Modules
 	std::unordered_map<std::string, Oscillator> oscillators;
 	Envelope m_envelope;
+	Filter m_filter;
 
 	// Sample Buffer for visualization
 	WaveData wave_data;
 };
-

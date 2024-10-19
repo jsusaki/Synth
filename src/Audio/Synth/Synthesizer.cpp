@@ -8,6 +8,9 @@ Synthesizer::Synthesizer()
     oscillators["OSC2"] = Oscillator(wave);
     oscillators["OSC3"] = Oscillator(wave);
 
+    m_filter = Filter(SAMPLE_RATE);
+    m_filter.Compute(Filter::Type::LOW_PASS, 1000.0, 0.7);
+
     // TODO: where do we get sample blocks from?
     wave_data.times.resize(SAMPLE_RATE/100, 0.0);
     wave_data.samples.resize(SAMPLE_RATE/100, 0.0);
@@ -17,19 +20,26 @@ f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
 {
     // Envelope
     f64 envelope_amplitude = m_envelope.Amplitude(time_step, n.on, n.off);
-    if (envelope_amplitude <= 0.0) note_finished = true;
+    if (envelope_amplitude <= 0.0001)
+        note_finished = true;
 
     // Oscillator
     // if (n.channel == 0)
     f64 sound_mixed = 0.0;
     for (auto& [id, osc] : oscillators)
-        sound_mixed += osc.GenerateWave(time_step - n.on, n);
+    {
+        // Generate wave
+        f32 sound = osc.GenerateWave(time_step - n.on, n);
 
-    // Low Frequency Oscillator
+        // Filter
+        sound = m_filter.FilterWave(sound);
 
-    // Filter
+        // TODO: Low Frequency Oscillator
 
-    // Effects
+        // TODO:  Effects
+
+        sound_mixed += sound;
+    }
 
     f64 output = std::clamp(envelope_amplitude * sound_mixed * m_master_volume, -1.0, 1.0);
 
@@ -41,7 +51,7 @@ void Synthesizer::Update(f64 time)
 	notes.erase(std::remove_if(notes.begin(), notes.end(), [](const note& n) { return !n.active; }), notes.end());
 }
 
-void Synthesizer::PlayToggle()
+void Synthesizer::TogglePlay()
 {
     m_playing = !m_playing;
 }

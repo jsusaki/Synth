@@ -1034,6 +1034,9 @@
     <ClInclude Include="ref\ADSR\ADSR.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Audio\Synth\Filter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\glm\detail\func_common.inl">

@@ -141,7 +141,7 @@ void Application::ProcessInput()
 
     if (input.IsKeyPressed(GLFW_KEY_SPACE))
     {
-        m_audio.synth.PlayToggle();
+        m_audio.synth.TogglePlay();
         m_gui.Play(m_audio.synth.IsPlaying());
     }
 
@@ -183,26 +183,6 @@ void Application::ProcessInput()
     if (input.IsKeyPressed(GLFW_KEY_DOWN))  master_volume -= 0.1f;
     m_audio.synth.SetMasterVolume(master_volume);
     
-    // Oscillator 1 Envelope Curve Control
-    if (input.IsKeyPressed(GLFW_KEY_Q))
-    {
-        m_audio.synth.m_envelope.attack_phase  = Envelope::Decay::LINEAR;
-        m_audio.synth.m_envelope.decay_phase   = Envelope::Decay::LINEAR;
-        m_audio.synth.m_envelope.release_phase = Envelope::Decay::LINEAR;
-    }
-    if (input.IsKeyPressed(GLFW_KEY_W))
-    {
-        m_audio.synth.m_envelope.attack_phase  = Envelope::Decay::QUADRATIC;
-        m_audio.synth.m_envelope.decay_phase   = Envelope::Decay::QUADRATIC;
-        m_audio.synth.m_envelope.release_phase = Envelope::Decay::QUADRATIC;
-    }
-    if (input.IsKeyPressed(GLFW_KEY_E))
-    {
-        m_audio.synth.m_envelope.attack_phase  = Envelope::Decay::EXPONENTIAL;
-        m_audio.synth.m_envelope.decay_phase   = Envelope::Decay::EXPONENTIAL;
-        m_audio.synth.m_envelope.release_phase = Envelope::Decay::EXPONENTIAL;
-    }
-
     if (input.IsKeyPressed(GLFW_KEY_TAB)) notes.clear();
 
     if (!m_gui.IsWindowFocused())

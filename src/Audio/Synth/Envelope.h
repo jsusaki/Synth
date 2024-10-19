@@ -1,5 +1,10 @@
 #pragma once
+
 #include "../../Core/Common.h"
+
+// Envelope ADSR: https://en.wikipedia.org/wiki/Envelope_(music)
+// olc-synth: https://github.com/OneLoneCoder/synth/blob/master/main2.cpp
+// earlevel engineering: https://www.earlevel.com/main/2013/06/03/envelope-generators-adsr-code/
 
 struct Envelope
 {
@@ -14,11 +19,7 @@ struct Envelope
         LINEAR,
         QUADRATIC,
         EXPONENTIAL,
-    };
-
-    Decay attack_phase;
-    Decay decay_phase;
-    Decay release_phase;
+    } decay_function;
 
     f64 CalculateDecay(f64 normalized_time, f64 start_amplitude, Decay mode)
     {
@@ -38,10 +39,7 @@ struct Envelope
         sustain_amplitude = 0.8;
         release_time      = 1.5;
         start_amplitude   = 1.0;
-
-        attack_phase  = Decay::LINEAR;
-        decay_phase   = Decay::LINEAR;
-        release_phase = Decay::LINEAR;
+        decay_function = Decay::LINEAR;
     }
 
     // TODO: State Machine Approach?
@@ -50,7 +48,7 @@ struct Envelope
         f64 amplitude_output  = 0.0;
         f64 release_amplitude = 0.0;
 
-        if (time_on > time_off) // Note is on
+        if (time_on > time_off) // Note on
         {
             f64 lifetime = time_step - time_on;
 
@@ -58,14 +56,14 @@ struct Envelope
             if (lifetime <= attack_time)
             {
                 f64 nt = lifetime / attack_time;
-                amplitude_output = CalculateDecay(nt, start_amplitude, attack_phase);
+                amplitude_output = CalculateDecay(nt, start_amplitude, decay_function);
             }
             // Decay phase
             else if (lifetime > attack_time && lifetime <= (attack_time + decay_time))
             {
                 f64 nt = (lifetime - attack_time) / decay_time;
                 f64 a  = sustain_amplitude - start_amplitude;
-                amplitude_output = CalculateDecay(nt, a, decay_phase) + start_amplitude;
+                amplitude_output = CalculateDecay(nt, a, decay_function) + start_amplitude;
             }
             // Sustain phase
             else if (lifetime > (attack_time + decay_time))
@@ -74,7 +72,7 @@ struct Envelope
             }
 
         }
-        else // Note is off
+        else // Note off
         {
             f64 lifetime = time_off - time_on;
 
@@ -82,14 +80,14 @@ struct Envelope
             if (lifetime <= attack_time)
             {
                 f64 nt = lifetime / attack_time;
-                release_amplitude = CalculateDecay(nt, start_amplitude, attack_phase);
+                release_amplitude = CalculateDecay(nt, start_amplitude, decay_function);
             }
             // Release in decay
             else if (lifetime > attack_time && lifetime <= (attack_time + decay_time))
             {
                 f64 nt = (lifetime - attack_time) / decay_time;
                 f64 a  = (sustain_amplitude - start_amplitude);
-                release_amplitude = CalculateDecay(nt, a, decay_phase) + start_amplitude;
+                release_amplitude = CalculateDecay(nt, a, decay_function) + start_amplitude;
             }
             // Release in sustain
             else if (lifetime > (attack_time + decay_time))
@@ -100,7 +98,7 @@ struct Envelope
             // Release phase
             f64 nt = (time_step - time_off) / release_time;
             f64 a = 0.0 - release_amplitude;
-            amplitude_output = CalculateDecay(nt, a, release_phase) + release_amplitude;
+            amplitude_output = CalculateDecay(nt, a, decay_function) + release_amplitude;
         }
         
         // Amplitude should not be negative
