@@ -21,7 +21,7 @@ Synthesizer::Synthesizer()
 
     m_filter = {
         .type             = Filter::Type::LOW_PASS,
-        .cutoff_frequency = 1000.0,
+        .frequency = 1000.0,
         .resonance        = 0.7,
         .sample_rate      = SAMPLE_RATE,
     };
@@ -45,7 +45,7 @@ f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
         f32 sound = osc.GenerateWave(time_step, n);
 
         // Filter
-        //sound = m_filter.FilterWave(sound);
+        sound = m_filter.FilterWave(sound);
 
         // TODO: Low Frequency Oscillator
 

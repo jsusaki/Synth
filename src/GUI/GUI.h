@@ -108,50 +108,7 @@ public:
             Mixer(synth);
 
             // Filter Control
-            ImVec2 slider_size(20, 300);
-            ImGui::Begin("Filter");
-            {
-                static f64 resonance = 0.7;
-                static f64 cutoff_freq = 1000.0;
-                static s32 filter_type = static_cast<s32>(synth.m_filter.type);
-
-                ImGui::Text(" C   R"); ImGui::SameLine();
-                ImGui::BeginGroup(); ImGui::SameLine();
-                ImGui::RadioButton("LPF", &filter_type, static_cast<s32>(Filter::Type::LOW_PASS));  ImGui::SameLine();
-                ImGui::RadioButton("HPF", &filter_type, static_cast<s32>(Filter::Type::HIGH_PASS)); ImGui::SameLine();
-                ImGui::RadioButton("BPF", &filter_type, static_cast<s32>(Filter::Type::BAND_PASS));
-                ImGui::EndGroup();
-
-                VSliderDouble("##C", slider_size, &cutoff_freq, 0.0, SAMPLE_RATE/2.0); ImGui::SameLine();
-                VSliderDouble("##R", slider_size,  &resonance, 0.0, 2.0);              ImGui::SameLine();
-
-                synth.m_filter.Compute(static_cast<Filter::Type>(filter_type), cutoff_freq, resonance);
-
-                s32 num_points  = 1000;
-                f64 sample_rate = 44100.0;
-                //f64 freq_step = (sample_rate / 2) / num_points;
-                f64 freq_step = cutoff_freq / num_points;
-                std::vector<f64> frequencies(num_points, 0.0);
-                std::vector<f64> magnitudes(num_points, 0.0);
-                for (s32 i = 0; i < num_points; i++) 
-                {
-                    f64 freq = i * freq_step;
-                    frequencies[i] = freq;
-                }
-                ImVec2 plot_size(500, 300);
-                static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
-                if (ImPlot::BeginPlot("Filter Frequency Response", ImVec2(plot_size))) 
-                {
-                    ImPlot::SetupAxes(nullptr, nullptr, flags | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoTickMarks);
-                    ImPlot::SetupAxisLimits(ImAxis_X1, 0, sample_rate / 2, ImGuiCond_Always);
-                    ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
-
-                    ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 3.0f);
-                    ImPlot::PlotLine("##Frequency Response", frequencies.data(), magnitudes.data(), num_points);
-                    ImPlot::EndPlot();
-                }
-            }
-            ImGui::End();
+            Filter(synth);
         }
     }
 
@@ -320,6 +277,61 @@ public:
             ImGui::EndGroup();
 
             osc.m_waveform = static_cast<Oscillator::Type>(waveform);
+        }
+        ImGui::End();
+    }
+
+    void Filter(Synthesizer& synth)
+    {
+        ImVec2 slider_size(20, 300);
+        ImGui::Begin("Filter");
+        {
+            static f64 resonance = 0.7;
+            static f64 cutoff_freq = 1000.0;
+            static s32 filter_type = static_cast<s32>(synth.m_filter.type);
+
+            ImGui::Text(" C   R"); ImGui::SameLine();
+            ImGui::BeginGroup();   ImGui::SameLine();
+            ImGui::RadioButton("LPF",  &filter_type, static_cast<s32>(Filter::Type::LOW_PASS));   ImGui::SameLine();
+            ImGui::RadioButton("HPF",  &filter_type, static_cast<s32>(Filter::Type::HIGH_PASS));  ImGui::SameLine();
+            ImGui::RadioButton("BPF",  &filter_type, static_cast<s32>(Filter::Type::BAND_PASS));  ImGui::SameLine();
+            ImGui::RadioButton("APF",  &filter_type, static_cast<s32>(Filter::Type::ALL_PASS));   ImGui::SameLine();
+            ImGui::RadioButton("PEAK", &filter_type, static_cast<s32>(Filter::Type::PEAK));       ImGui::SameLine();
+            ImGui::RadioButton("NOTCH",&filter_type, static_cast<s32>(Filter::Type::NOTCH));      ImGui::SameLine();
+            ImGui::RadioButton("LSF",  &filter_type, static_cast<s32>(Filter::Type::LOW_SHELF));  ImGui::SameLine();
+            ImGui::RadioButton("HSF",  &filter_type, static_cast<s32>(Filter::Type::HIGH_SHELF)); ImGui::SameLine();
+            ImGui::EndGroup();
+
+            VSliderDouble("##F", slider_size, &cutoff_freq, 0.0, SAMPLE_RATE / 2.0); ImGui::SameLine();
+            VSliderDouble("##R", slider_size, &resonance, 0.0, 2.0);                 ImGui::SameLine();
+
+            synth.m_filter.ComputeCoefficients(cutoff_freq, resonance);
+
+            // TODO: Plot Frequency and Magnitude
+            //s32 num_points  = 1000;
+            f64 sample_rate = 44100.0;
+            f64 freq_step = (sample_rate / 2);
+            s64 sample_size = 20000;
+            std::vector<f64> frequencies(20000, 0.0);
+            std::vector<f64> magnitudes(sample_size, 0.0);
+            for (s32 i = 0; i < sample_size; i++)
+            {
+                f64 freq = i * freq_step;
+                frequencies[i] = freq;
+            }
+
+            ImVec2 plot_size(500, 300);
+            static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
+            if (ImPlot::BeginPlot("Filter Frequency Response", ImVec2(plot_size)))
+            {
+                ImPlot::SetupAxes(nullptr, nullptr, flags | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoTickMarks);
+                ImPlot::SetupAxisLimits(ImAxis_X1, 0, sample_rate / 2, ImGuiCond_Always);
+                ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
+
+                ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 3.0f);
+                ImPlot::PlotLine("##Frequency Response", frequencies.data(), magnitudes.data(), frequencies.size());
+                ImPlot::EndPlot();
+            }
         }
         ImGui::End();
     }
