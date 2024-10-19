@@ -146,9 +146,7 @@ void Application::ProcessInput()
     }
 
     // Control variables
-    static f64 master_volume = 0.5f;
     static s32 octave = 4*12;
-    static f64 osc1_volume = 0.5f;
 
     f64 time_step = m_audio.Timestep();
     std::vector<note>& notes = m_audio.synth.GetNotes();
@@ -178,11 +176,6 @@ void Application::ProcessInput()
     if (input.IsKeyPressed(GLFW_KEY_RIGHT)) octave += 12;
     if (octave < 0) octave = 0;
 
-    // Master Volume Control
-    if (input.IsKeyPressed(GLFW_KEY_UP))    master_volume += 0.1f;
-    if (input.IsKeyPressed(GLFW_KEY_DOWN))  master_volume -= 0.1f;
-    m_audio.synth.SetMasterVolume(master_volume);
-    
     if (input.IsKeyPressed(GLFW_KEY_TAB)) notes.clear();
 
     if (!m_gui.IsWindowFocused())
@@ -199,7 +192,7 @@ void Application::ProcessInput()
 
 void Application::Update(f32 dt)
 {
-    m_audio.Update(1/SAMPLE_RATE);
+    m_audio.Update(1.0/SAMPLE_RATE);
     m_gui.Display(m_audio.synth);
 }
 

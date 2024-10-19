@@ -2,14 +2,22 @@
 
 Synthesizer::Synthesizer()
 {
+    // Synth Config
+    m_master_volume = 0.5;
+    m_max_frequency = 20000.0;
+
     // Create oscillator
     Wave wave = Wave(1.0, note_to_freq(9));
     oscillators["OSC1"] = Oscillator(wave);
     oscillators["OSC2"] = Oscillator(wave);
     oscillators["OSC3"] = Oscillator(wave);
 
+    oscillators["OSC2"].m_pitch = 12;
+    oscillators["OSC3"].m_pitch = 24;
+
     m_filter = Filter(SAMPLE_RATE);
     m_filter.Compute(Filter::Type::LOW_PASS, 1000.0, 0.7);
+
 
     // TODO: where do we get sample blocks from?
     wave_data.times.resize(SAMPLE_RATE/100, 0.0);
@@ -29,10 +37,10 @@ f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
     for (auto& [id, osc] : oscillators)
     {
         // Generate wave
-        f32 sound = osc.GenerateWave(time_step - n.on, n);
+        f32 sound = osc.GenerateWave(time_step, n);
 
         // Filter
-        sound = m_filter.FilterWave(sound);
+        //sound = m_filter.FilterWave(sound);
 
         // TODO: Low Frequency Oscillator
 

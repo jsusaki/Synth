@@ -26,7 +26,7 @@ public:
     // TODO: custom function
     f64 GenerateWave(f64 time_step, note n)
     {
-        SetNote(n.id + pitch);
+        SetNote(n.id + m_pitch);
 
         switch (m_waveform)
         {
@@ -56,7 +56,8 @@ public:
             m_output = 0.0;
         }
 
-        m_output = std::clamp(m_output * volume, -1.0, 1.0);
+        f64 effective_volume = m_mute ? 0.0 : m_volume;
+        m_output = std::clamp(m_output * effective_volume , -1.0, 1.0);
 
         return m_output;
     }
@@ -96,12 +97,12 @@ public:
     */
 
     void SetNote(s32 id) { m_wave.SetFrequency(note_to_freq(id)); }
-    void SetVolume(f64 amplitude) { volume = std::clamp(amplitude, 0.0, 1.0);  m_wave.SetAmplitude(amplitude); }
+    void SetVolume(f64 amplitude) { m_volume = std::clamp(amplitude, 0.0, 1.0);  m_wave.SetAmplitude(amplitude); }
     void SetWaveform(Type w) { m_waveform = w; }
 
 public:
-    f64 volume      = 1.0;
-    s32 pitch       = 0;
+    f64 m_volume    = 1.0;
+    s32 m_pitch     = 0;
     f64 m_output    = 0.0;
     Type m_waveform = Type::WAVE_SINE;
     Wave m_wave;
@@ -111,6 +112,8 @@ public:
     f64 m_phase_acc = 0.0f;
     f64 m_max_frequency = 20000.0;
 
+    bool m_mute = false;
+
 };
 
 static std::string wave_str(Oscillator::Type type)
@@ -118,12 +121,12 @@ static std::string wave_str(Oscillator::Type type)
     std::string n;
     switch (type)
     {
-    case Oscillator::Type::WAVE_SINE:          n = "SINE";     break;
-    case Oscillator::Type::WAVE_SQUARE:        n = "SQUARE";   break;
-    case Oscillator::Type::WAVE_TRIANGLE:      n = "TRIANGLE"; break;
-    case Oscillator::Type::WAVE_DIGI_SAWTOOTH: n = "SAWTOOTH"; break;
+    case Oscillator::Type::WAVE_SINE:          n = "SINE";            break;
+    case Oscillator::Type::WAVE_SQUARE:        n = "SQUARE";          break;
+    case Oscillator::Type::WAVE_TRIANGLE:      n = "TRIANGLE";        break;
+    case Oscillator::Type::WAVE_DIGI_SAWTOOTH: n = "SAWTOOTH";        break;
     case Oscillator::Type::WAVE_ANLG_SAWTOOTH: n = "ANALOG SAWTOOTH"; break;
-    case Oscillator::Type::NOISE_WHITE:        n = "WHITE"; break;
+    case Oscillator::Type::NOISE_WHITE:        n = "WHITE";           break;
     }
     return n;
 }

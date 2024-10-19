@@ -90,9 +90,10 @@ public:
 
             // Oscillator Control
             static s32 wf1 = 0, wf2 = 0, wf3 = 0;
-            Oscillator(synth.GetOscillator("OSC1"), "OSC1", wf1);
-            Oscillator(synth.GetOscillator("OSC2"), "OSC2", wf2);
-            Oscillator(synth.GetOscillator("OSC3"), "OSC3", wf3);
+            static bool mute1 = false, mute2 = false, mute3 = false;
+            Oscillator(synth.GetOscillator("OSC1"), "OSC1", wf1, mute1);
+            Oscillator(synth.GetOscillator("OSC2"), "OSC2", wf2, mute2);
+            Oscillator(synth.GetOscillator("OSC3"), "OSC3", wf3, mute3);
 
             // Oscilloscope Control
             Oscilloscope(synth);
@@ -295,14 +296,17 @@ public:
         ImGui::End();
     }
 
-    void Oscillator(Oscillator& osc, std::string label, s32& waveform)
+    void Oscillator(Oscillator& osc, std::string label, s32& waveform, bool& mute)
     {
         ImVec2 osc_slider_size(20, 150);
         ImGui::Begin(label.c_str());
         {
-            ImGui::Text(" P   V");
-            ImGui::VSliderInt("##P", osc_slider_size, &osc.pitch,  -24, 48);  ImGui::SameLine();
-            VSliderDouble("##V",     osc_slider_size, &osc.volume, 0.0, 1.0); ImGui::SameLine();
+            ImGui::Text(" P   V"); ImGui::SameLine();
+
+            ImGui::Checkbox("Mute", &osc.m_mute);
+
+            ImGui::VSliderInt("##P", osc_slider_size, &osc.m_pitch,  -24, 48);  ImGui::SameLine();
+            VSliderDouble("##V",     osc_slider_size, &osc.m_volume, 0.0, 1.0); ImGui::SameLine();
 
             ImGui::BeginGroup();
             ImGui::RadioButton("SINE",     &waveform, static_cast<s32>(Oscillator::Type::WAVE_SINE));

@@ -39,7 +39,7 @@ struct Envelope
         sustain_amplitude = 0.8;
         release_time      = 1.5;
         start_amplitude   = 1.0;
-        decay_function = Decay::LINEAR;
+        decay_function = Decay::EXPONENTIAL;
     }
 
     // TODO: State Machine Approach?

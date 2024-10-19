@@ -136,9 +136,9 @@ public:
 	std::unordered_map<std::string, Oscillator>& GetOscillators();
 
 public:
-	f64 m_master_volume = 0.5;
-	f64 max_frequency = 20000.0;
-	bool m_playing = true;
+	f64 m_master_volume;
+	f64 m_max_frequency;
+	bool m_playing;
 
 	// Notes
 	std::vector<note> notes;
