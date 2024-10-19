@@ -3,23 +3,29 @@
 Synthesizer::Synthesizer()
 {
     // Synth Config
-    m_master_volume = 0.5;
+    m_master_volume = 0.2;
     m_max_frequency = 20000.0;
 
-    // Create oscillator
-    Wave wave = Wave(1.0, note_to_freq(9));
-    oscillators["OSC1"] = Oscillator(wave);
-    oscillators["OSC2"] = Oscillator(wave);
-    oscillators["OSC3"] = Oscillator(wave);
+    oscillators["OSC1"] = Oscillator(0.8,  0, Oscillator::Type::WAVE_SINE);
+    oscillators["OSC2"] = Oscillator(0.3, 12, Oscillator::Type::WAVE_ANLG_SAWTOOTH);
+    oscillators["OSC3"] = Oscillator(0.1, 24, Oscillator::Type::WAVE_ANLG_SAWTOOTH);
 
-    oscillators["OSC2"].m_pitch = 12;
-    oscillators["OSC3"].m_pitch = 24;
+    m_envelope = {
+        .attack_time       = 0.6,
+        .decay_time        = 1.0,
+        .sustain_amplitude = 0.8,
+        .release_time      = 1.5,
+        .start_amplitude   = 1.0,
+        .decay_function    = Envelope::Decay::EXPONENTIAL
+    };
 
-    m_filter = Filter(SAMPLE_RATE);
-    m_filter.Compute(Filter::Type::LOW_PASS, 1000.0, 0.7);
+    m_filter = {
+        .type             = Filter::Type::LOW_PASS,
+        .cutoff_frequency = 1000.0,
+        .resonance        = 0.7,
+        .sample_rate      = SAMPLE_RATE,
+    };
 
-
-    // TODO: where do we get sample blocks from?
     wave_data.times.resize(SAMPLE_RATE/100, 0.0);
     wave_data.samples.resize(SAMPLE_RATE/100, 0.0);
 }
@@ -30,7 +36,6 @@ f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
     f64 envelope_amplitude = m_envelope.Amplitude(time_step, n.on, n.off);
     if (envelope_amplitude <= 0.0001)
         note_finished = true;
-
     // Oscillator
     // if (n.channel == 0)
     f64 sound_mixed = 0.0;

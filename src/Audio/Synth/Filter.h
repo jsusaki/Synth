@@ -13,11 +13,6 @@
 
 struct Filter
 {
-    Filter(f64 sr = SAMPLE_RATE)
-    {
-        sample_rate = sr;
-    }
-
     enum class Type 
     { 
         LOW_PASS, 

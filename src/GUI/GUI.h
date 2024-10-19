@@ -89,7 +89,9 @@ public:
             General(synth);   
 
             // Oscillator Control
-            static s32 wf1 = 0, wf2 = 0, wf3 = 0;
+            static s32 wf1 = static_cast<s32>(synth.GetOscillator("OSC1").m_waveform);
+            static s32 wf2 = static_cast<s32>(synth.GetOscillator("OSC2").m_waveform);
+            static s32 wf3 = static_cast<s32>(synth.GetOscillator("OSC3").m_waveform);
             static bool mute1 = false, mute2 = false, mute3 = false;
             Oscillator(synth.GetOscillator("OSC1"), "OSC1", wf1, mute1);
             Oscillator(synth.GetOscillator("OSC2"), "OSC2", wf2, mute2);
@@ -99,7 +101,7 @@ public:
             Oscilloscope(synth);
 
             // Envelope Control
-            static s32 decay_function = 0;
+            static s32 decay_function = static_cast<s32>(synth.m_envelope.decay_function);
             Envelope(synth, decay_function);
 
             // Volume Control
@@ -111,7 +113,7 @@ public:
             {
                 static f64 resonance = 0.7;
                 static f64 cutoff_freq = 1000.0;
-                static s32 filter_type = 0;
+                static s32 filter_type = static_cast<s32>(synth.m_filter.type);
 
                 ImGui::Text(" C   R"); ImGui::SameLine();
                 ImGui::BeginGroup(); ImGui::SameLine();
@@ -123,7 +125,7 @@ public:
                 VSliderDouble("##C", slider_size, &cutoff_freq, 0.0, SAMPLE_RATE/2.0); ImGui::SameLine();
                 VSliderDouble("##R", slider_size,  &resonance, 0.0, 2.0);              ImGui::SameLine();
 
-                synth.m_filter.Compute(static_cast<Filter::Type>(decay_function), cutoff_freq, resonance);
+                synth.m_filter.Compute(static_cast<Filter::Type>(filter_type), cutoff_freq, resonance);
 
                 s32 num_points  = 1000;
                 f64 sample_rate = 44100.0;

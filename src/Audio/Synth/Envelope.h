@@ -17,8 +17,8 @@ struct Envelope
     enum class Decay : u8
     {
         LINEAR,
-        QUADRATIC,
         EXPONENTIAL,
+        QUADRATIC,
     } decay_function;
 
     f64 CalculateDecay(f64 normalized_time, f64 start_amplitude, Decay mode)
@@ -26,20 +26,10 @@ struct Envelope
         switch (mode)
         {
         case Decay::LINEAR:      return start_amplitude * normalized_time;
-        case Decay::QUADRATIC:   return start_amplitude * std::pow(normalized_time, 2.0);
         case Decay::EXPONENTIAL: return start_amplitude * (1.0 - std::exp(-5.0 * normalized_time));
+        case Decay::QUADRATIC:   return start_amplitude * std::pow(normalized_time, 2.0);
         default:                 return start_amplitude * normalized_time;
         }
-    }
-
-    Envelope()
-    {
-        attack_time       = 1.3;
-        decay_time        = 1.0;
-        sustain_amplitude = 0.8;
-        release_time      = 1.5;
-        start_amplitude   = 1.0;
-        decay_function = Decay::EXPONENTIAL;
     }
 
     // TODO: State Machine Approach?
