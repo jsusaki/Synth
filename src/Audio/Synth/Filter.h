@@ -79,6 +79,7 @@ struct BqFilter
         NOTCH,
         LOW_SHELF,
         HIGH_SHELF,
+        OFF,
 
     } type;
 
@@ -112,69 +113,69 @@ struct BqFilter
             b0 = (1.0f - cos_omega) * 0.5f;
             b1 = (1.0f - cos_omega);
             b2 = (1.0f - cos_omega) * 0.5f;
-            a0 = 1.0f + alpha;
+            a0 =  1.0f + alpha;
             a1 = -2.0f * cos_omega;
-            a2 = 1.0f - alpha;
+            a2 =  1.0f - alpha;
             break;
 
         case Type::HIGH_PASS:
-            b0 = (1.0f + cos_omega) * 0.5f;
+            b0 =  (1.0f + cos_omega) * 0.5f;
             b1 = -(1.0f + cos_omega);
-            b2 = (1.0f + cos_omega) * 0.5f;
-            a0 = 1.0f + alpha;
-            a1 = -2.0f * cos_omega;
-            a2 = 1.0f - alpha;
+            b2 =  (1.0f + cos_omega) * 0.5f;
+            a0 =   1.0f + alpha;
+            a1 =  -2.0f * cos_omega;
+            a2 =   1.0f - alpha;
             break;
 
         case Type::BAND_PASS:
-            b0 = alpha;
-            b1 = 0.0f;
+            b0 =  alpha;
+            b1 =  0.0f;
             b2 = -alpha;
-            a0 = 1.0f + alpha;
+            a0 =  1.0f + alpha;
             a1 = -2.0f * cos_omega;
-            a2 = 1.0f - alpha;            
+            a2 =  1.0f - alpha;            
             break;
 
         case Type::ALL_PASS:
-            b0 = 1.0f - alpha;
+            b0 =  1.0f - alpha;
             b1 = -2.0f * cos_omega;
-            b2 = 1.0f + alpha;
-            a0 = 1.0f + alpha;
+            b2 =  1.0f + alpha;
+            a0 =  1.0f + alpha;
             a1 = -2.0f * cos_omega;
-            a2 = 1.0f - alpha;
+            a2 =  1.0f - alpha;
             break;
 
         case Type::PEAK:
-            b0 = 1.0f + (alpha * gain);
+            b0 =  1.0f + (alpha * gain);
             b1 = -2.0f * cos_omega;
-            b2 = 1.0f - (alpha * gain);
-            a0 = 1.0f + (alpha / gain);
+            b2 =  1.0f - (alpha * gain);
+            a0 =  1.0f + (alpha / gain);
             a1 = -2.0f * cos_omega;
-            a2 = 1.0f - (alpha / gain);
+            a2 =  1.0f - (alpha / gain);
             break;
 
         case Type::NOTCH:
-            b0 = 1.0f;
+            b0 =  1.0f;
             b1 = -2.0f * cos_omega;
-            b2 = 1.0f;
-            a0 = 1.0f + alpha;
+            b2 =  1.0f;
+            a0 =  1.0f + alpha;
             a1 = -2.0f * cos_omega;
-            a2 = 1.0f - alpha;
+            a2 =  1.0f - alpha;
             break;
 
         case Type::LOW_SHELF:
-            b0 = gain * ((gain + 1.0f) - (gain - 1.0f) * cos_omega + beta * sin_omega);
+            b0 =  gain * ((gain + 1.0f) - (gain - 1.0f) * cos_omega + beta * sin_omega);
             b1 = 2.0f * gain * ((gain - 1.0f) - (gain + 1.0f) * cos_omega);
-            b2 = gain * ((gain + 1.0f) - (gain - 1.0f) * cos_omega - beta * sin_omega);
+            b2 =  gain * ((gain + 1.0f) - (gain - 1.0f) * cos_omega - beta * sin_omega);
             a0 = (gain + 1.0f) + (gain - 1.0f) * cos_omega + beta * sin_omega;
             a1 = -2.0f * ((gain - 1.0f) + (gain + 1.0f) * cos_omega);
             a2 = (gain + 1.0f) + (gain - 1.0f) * cos_omega - beta * sin_omega;            
             break;
 
         case Type::HIGH_SHELF:
-            b0 = gain * ((gain + 1.0f) + (gain - 1.0f) * cos_omega + beta * sin_omega);
+            b0 =  gain * ((gain + 1.0f) + (gain - 1.0f) * cos_omega + beta * sin_omega);
             b1 = -2.0f * gain * ((gain - 1.0f) + (gain + 1.0f) * cos_omega);
-            b2 = gain * ((gain + 1.0f) + (gain - 1.0f) * cos_omega - beta * sin_omega);
+            b2 =  gain * ((gain + 1.0f) + (gain - 1.0f) * cos_omega - beta * sin_omega);
             a0 = (gain + 1.0f) - (gain - 1.0f) * cos_omega + beta * sin_omega;
             a1 = 2.0f * ((gain - 1.0f) - (gain + 1.0f) * cos_omega);
             a2 = (gain + 1.0f) - (gain - 1.0f) * cos_omega - beta * sin_omega;
@@ -199,6 +200,8 @@ struct BqFilter
 
     f64 FilterWave(f64 const& x) 
     {
+        if (type == Type::OFF) return x;
+
         f64 y = b0 * x + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
 
         x2 = x1;

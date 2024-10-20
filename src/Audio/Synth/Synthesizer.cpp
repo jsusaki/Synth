@@ -55,8 +55,8 @@ f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
         f64 sound = osc.GenerateWave(time_step, n);
 
         // Filter
-        //sound = m_filter.FilterWave(sound);
-        sound = m_vafilter.FilterWave(sound);
+        //sound = m_filter.FilterWave(sound * envelope_amplitude);
+        sound = m_vafilter.FilterWave(sound * envelope_amplitude);
 
         // TODO: Low Frequency Oscillator
 
@@ -65,7 +65,7 @@ f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
         sound_mixed += sound;
     }
 
-    f64 output = std::clamp(envelope_amplitude * sound_mixed * m_master_volume, -1.0, 1.0);
+    f64 output = std::clamp(sound_mixed * m_master_volume, -1.0, 1.0);
 
     return output;
 }

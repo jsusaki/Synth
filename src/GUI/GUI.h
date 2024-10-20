@@ -5,6 +5,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include "implot.h"
+#include "imgui-knobs.h"
 
 #include "../Core/Common.h"
 #include "../Audio/AudioEngine.h"
@@ -52,8 +53,6 @@ static bool VSliderDouble(const char* label, const ImVec2& size, double* v, doub
 {
     return ImGui::VSliderScalar(label, size, ImGuiDataType_Double, v, &v_min, &v_max, format, flags);
 }
-
-
 
 class GUI
 {
@@ -201,8 +200,6 @@ public:
 
     void Envelope(Synthesizer& synth,s32& decay_function)
     {
-        ImVec2 slider_size(20, 300);
-        ImVec2 plot_size(500, 300);
         ImGui::Begin("Envelope Generator");
         {
             ImGui::Text(" A   D   S   R"); ImGui::SameLine();
@@ -212,10 +209,11 @@ public:
             ImGui::RadioButton("QUAD",   &decay_function, static_cast<s32>(Envelope::Decay::QUADRATIC));
             ImGui::EndGroup();
 
-            VSliderDouble("##A", slider_size, &synth.m_envelope.attack_time, 0.0, 10.0);      ImGui::SameLine();
-            VSliderDouble("##D", slider_size, &synth.m_envelope.decay_time, 0.0, 10.0);       ImGui::SameLine();
-            VSliderDouble("##S", slider_size, &synth.m_envelope.sustain_amplitude, 0.0, 1.0); ImGui::SameLine();
-            VSliderDouble("##R", slider_size, &synth.m_envelope.release_time, 0.0, 10.0);     ImGui::SameLine();
+            ImVec2 slider_size(20, 300);
+            VSliderDouble("##A", slider_size, &synth.m_envelope.attack_time, 0.0, 10.0, "%.2f");      ImGui::SameLine();
+            VSliderDouble("##D", slider_size, &synth.m_envelope.decay_time, 0.0, 10.0, "%.2f");       ImGui::SameLine();
+            VSliderDouble("##S", slider_size, &synth.m_envelope.sustain_amplitude, 0.0, 1.0, "%.2f"); ImGui::SameLine();
+            VSliderDouble("##R", slider_size, &synth.m_envelope.release_time, 0.0, 10.0, "%.2f");     ImGui::SameLine();
 
             synth.m_envelope.decay_function = static_cast<Envelope::Decay>(decay_function);
 
@@ -241,6 +239,7 @@ public:
                 global_time += t;
             }
 
+            ImVec2 plot_size(500, 300);
             static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
             if (ImPlot::BeginPlot("ADSR Envelope", plot_size))
             {
@@ -283,7 +282,6 @@ public:
 
     void Filter(Synthesizer& synth)
     {
-        ImVec2 slider_size(40, 300);
         ImGui::Begin("Filter");
         {
             static f64 resonance = 0.7;
@@ -296,7 +294,7 @@ public:
             static f64 prev_cutoff_freq = cutoff_freq;
             static s32 prev_filter_type = filter_type;
 
-            ImGui::Text(" C   R"); ImGui::SameLine();
+            ImGui::Text("   C     R   "); ImGui::SameLine();
             ImGui::BeginGroup();   ImGui::SameLine();
             ImGui::RadioButton("LPF",  &filter_type, static_cast<s32>(VAFilter::Type::LOW_PASS));   ImGui::SameLine();
             ImGui::RadioButton("HPF",  &filter_type, static_cast<s32>(VAFilter::Type::HIGH_PASS));  ImGui::SameLine();
@@ -313,8 +311,9 @@ public:
             //ImGui::RadioButton("HSF",  &filter_type, static_cast<s32>(Filter::Type::HIGH_SHELF)); ImGui::SameLine();
             ImGui::EndGroup();
 
-            VSliderDouble("##F", slider_size, &cutoff_freq, 0.0, SAMPLE_RATE / 2.0); ImGui::SameLine();
-            VSliderDouble("##R", slider_size, &resonance, 0.0, 2.0);                 ImGui::SameLine();
+            //ImGuiKnobs::KnobDouble("F", &cutoff_freq, 20.0, SAMPLE_RATE/2.0, 100.0f, "%.2fHz", ImGuiKnobVariant_Tick);
+            VSliderDouble("##F", ImVec2(40, 300), &cutoff_freq, 20.0, SAMPLE_RATE / 2.0); ImGui::SameLine();
+            VSliderDouble("##R", ImVec2(20, 300), &resonance, 0.0, 1.0, "%.2f");          ImGui::SameLine();
 
             if (resonance != prev_resonance || cutoff_freq != prev_cutoff_freq || filter_type != prev_filter_type)
             {
@@ -345,14 +344,14 @@ public:
 
             ImVec2 plot_size(500, 300);
             static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
-            if (ImPlot::BeginPlot("Filter Frequency Response", ImVec2(plot_size)))
+            if (ImPlot::BeginPlot("Filter Frequency", ImVec2(plot_size)))
             {
                 ImPlot::SetupAxes(nullptr, nullptr, flags | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoTickMarks);
                 ImPlot::SetupAxisLimits(ImAxis_X1, 0, sample_rate / 2, ImGuiCond_Always);
                 ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 1);
 
                 ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 3.0f);
-                ImPlot::PlotLine("##Frequency Response", frequencies.data(), magnitudes.data(), frequencies.size());
+                ImPlot::PlotLine("##Filter Frequency", frequencies.data(), magnitudes.data(), frequencies.size());
                 ImPlot::EndPlot();
             }
         }
