@@ -70,24 +70,24 @@
 #include "Filter.h"
 
 // FEATURES
-	// TODO: Filters: Low Pass Filter, High Pass Filter
+	// TODO: Filter Graph 
 
 	// TODO: Low-Frequency Oscillator
 	// TODO: Effects: Reverb, Chorus, Delay
-	// TODO: Modular Synthesizer (module, patch)
 	// TODO: Sequencer
 	// TODO: Spectrogram (FFT)
+	// TODO: Track
+	// TODO: Record
+	// TODO: Playback
 	// TODO: .wav support
 	// TODO: .midi support
-	// TODO: Track
-	// TODO: Recording
+	// TODO: Modular Synthesizer (module, patch)
 
 // IMPROVEMENTS
 	// TODO: Oscilloscope improvement
-	// TODO: Filter graph improvement
 
 // BUGS
-	// KNOWN BUG: Sine Wave Clipping in ADSR: Release to Attack; sound engineering problem: attenuate with filter
+	// BUG KNOWN: Sine Wave Clipping in ADSR: Release to Attack; sound engineering problem: attenuate with filter
 
 // DONE
 	// DONE: Audio Driver
@@ -101,8 +101,9 @@
 	// DONE: Volume Control
 	// DONE: Midi Keyboard
 	// DONE: Envelope ADSR Visualization
-	// SOLVED BUG: After some time running the program, it introduces noise (buffer overflow?)
+	// BUG SOLVED: After some time running the program, it introduces noise (buffer overflow?)
 	// DONE: Oscilloscope Interface
+	// DONE: Filters: Low Pass, High Pass, Bandpass: VAFilter, BqFilter
 
 struct WaveData
 {
@@ -149,6 +150,8 @@ public:
 	BqFilter m_filter;
 	VAFilter m_vafilter;
 
-	// Sample Buffer for visualization
+	// Sample Buffer for processing and visualization
 	WaveData wave_data;
+
+	bool vafilter = true;
 };

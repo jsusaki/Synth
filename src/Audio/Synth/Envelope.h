@@ -33,7 +33,7 @@ struct Envelope
     }
 
     // TODO: State Machine Approach?
-    f64 Amplitude(const f64 time_step, const f64 time_on, const f64 time_off)
+    f64 GenerateAmplitude(const f64 time_step, const f64 time_on, const f64 time_off)
     {
         f64 amplitude_output  = 0.0;
         f64 release_amplitude = 0.0;
