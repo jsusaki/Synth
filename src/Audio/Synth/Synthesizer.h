@@ -70,10 +70,11 @@
 #include "Filter.h"
 
 // FEATURES
-	// TODO: Filter Graph 
-
 	// TODO: Low-Frequency Oscillator
+	// TODO: Filter Envelope
+
 	// TODO: Effects: Reverb, Chorus, Delay
+	// TODO: Basic Instruments
 	// TODO: Sequencer
 	// TODO: Spectrogram (FFT)
 	// TODO: Track
@@ -81,13 +82,13 @@
 	// TODO: Playback
 	// TODO: .wav support
 	// TODO: .midi support
+	// TODO: Node-based interface
 	// TODO: Modular Synthesizer (module, patch)
 
 // IMPROVEMENTS
 	// TODO: Oscilloscope improvement
 
 // BUGS
-	// BUG KNOWN: Sine Wave Clipping in ADSR: Release to Attack; sound engineering problem: attenuate with filter
 
 // DONE
 	// DONE: Audio Driver
@@ -104,6 +105,8 @@
 	// BUG SOLVED: After some time running the program, it introduces noise (buffer overflow?)
 	// DONE: Oscilloscope Interface
 	// DONE: Filters: Low Pass, High Pass, Bandpass: VAFilter, BqFilter
+	// DONE: Filter Graph 
+	// BUG SOLVED: Sine Wave Clipping in ADSR: Release to Attack; sound engineering problem: attenuate with filter
 
 struct WaveData
 {
@@ -146,12 +149,14 @@ public:
 
 	// Modules
 	std::unordered_map<std::string, Oscillator> oscillators;
-	Envelope m_envelope;
+	Envelope m_amp_envelope;
+	Envelope m_filter_envelope;
 	BqFilter m_filter;
 	VAFilter m_vafilter;
+	Oscillator m_lfo;
 
 	// Sample Buffer for processing and visualization
 	WaveData wave_data;
 
-	bool vafilter = true;
+	bool vafilter = false;
 };

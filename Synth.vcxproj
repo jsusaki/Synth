@@ -494,11 +494,12 @@
     <ClInclude Include="lib\imgui\imstb_truetype.h" />
     <ClInclude Include="lib\imgui\misc\cpp\imgui_stdlib.h" />
     <ClInclude Include="lib\miniaudio\miniaudio.h" />
-    <ClInclude Include="ref\ADSR\ADSR.h" />
     <ClInclude Include="src\Audio\Driver\AudioDriver.h" />
     <ClInclude Include="src\Audio\AudioEngine.h" />
     <ClInclude Include="src\Audio\Synth\Envelope.h" />
     <ClInclude Include="src\Audio\Synth\Filter.h" />
+    <ClInclude Include="src\Audio\Synth\FrequencyModulator.h" />
+    <ClInclude Include="src\Audio\Synth\Reverb.h" />
     <ClInclude Include="src\Audio\Synth\Synthesizer.h" />
     <ClInclude Include="src\Audio\Synth\Note.h" />
     <ClInclude Include="src\Audio\Synth\Oscillator.h" />

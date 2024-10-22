@@ -93,6 +93,9 @@ struct Envelope
         
         // Amplitude should not be negative
         amplitude_output = std::clamp(amplitude_output, 0.0, 1.0);
+        //if (amplitude_output <= 0.00001)
+            //amplitude_output = 0.0;
+
         return amplitude_output;
     }
 };

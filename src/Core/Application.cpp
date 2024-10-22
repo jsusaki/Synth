@@ -94,6 +94,7 @@ void Application::ProcessNoteInput(f64 time, s32 key, u32 note_id, std::vector<n
             note n;
             n.id = note_id;
             n.on = time;
+            n.off = -1.0;
             n.channel = 0;
             n.active = true;
             notes.emplace_back(n);

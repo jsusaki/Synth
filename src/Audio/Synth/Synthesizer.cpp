@@ -6,71 +6,86 @@ Synthesizer::Synthesizer()
     m_master_volume = 0.2;
     m_max_frequency = 20000.0;
 
+    // TODO: struct Instrument
+    // Oscillator
     oscillators["OSC1"] = Oscillator(0.8,  0, Oscillator::Type::WAVE_SINE);
     oscillators["OSC2"] = Oscillator(0.3, 12, Oscillator::Type::WAVE_ANLG_SAWTOOTH);
     oscillators["OSC3"] = Oscillator(0.1, 24, Oscillator::Type::WAVE_ANLG_SAWTOOTH);
 
-    m_envelope = {
-        .attack_time       = 0.6,
+    // LFO
+    m_lfo = Oscillator(0.01, 0, Oscillator::Type::WAVE_SINE);
+    m_lfo.m_wave.frequency = 5.0;
+    m_lfo.m_wave.amplitude = 0.01;
+
+    // ADSR
+    m_amp_envelope = {
+        .attack_time       = 0.3,
         .decay_time        = 1.0,
         .sustain_amplitude = 0.8,
-        .release_time      = 1.5,
+        .release_time      = 2.5,
         .start_amplitude   = 1.0,
         .decay_function    = Envelope::Decay::EXPONENTIAL
     };
 
+    // Filter
     m_filter = {
         .type             = BqFilter::Type::LOW_PASS,
-        .frequency        = 10000.0,
-        .resonance        = 0.7,
+        .frequency        = 2000.0,
+        .resonance        = 0.5,
         .sample_rate      = SAMPLE_RATE,
     };
-
-    m_filter.CalcCoefs(10000.0, 0.7);
+    m_filter.CalcCoefs(2000.0, 0.5);
 
     m_vafilter = {
-        .type = VAFilter::Type::LOW_PASS,
-        .frequency = 10000.0,
-        .resonance = 0.7,
-        .sample_rate = SAMPLE_RATE,
+        .type             = VAFilter::Type::LOW_PASS,
+        .frequency        = 2000.0,
+        .resonance        = 0.5,
+        .sample_rate      = SAMPLE_RATE,
     };
+    m_vafilter.CalcCoefs(2000.0, 0.5);
 
-    m_vafilter.CalcCoefs(10000.0, 0.7);
-
+    // Data
     wave_data.times.resize(SAMPLE_RATE/100, 0.0);
     wave_data.samples.resize(SAMPLE_RATE/100, 0.0);
 }
 
 f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
 {
-    // Envelope
-    f64 amplitude = m_envelope.GenerateAmplitude(time_step, n.on, n.off);
+    // Amplitude Envelope
+    f64 amplitude = m_amp_envelope.GenerateAmplitude(time_step, n.on, n.off);
     if (amplitude <= 0.00001)
     {
         note_finished = true;
         return 0.0;
     }
+    
+    // Low Frequency Oscillator
+    f64 lfo_output = m_lfo.GenerateWave(time_step, m_lfo.m_wave.amplitude, m_lfo.m_wave.frequency);
 
     // Oscillator
     f64 sound_mixed = 0.0;
     for (auto& [id, osc] : oscillators)
     {
+        // TODO: Frequency Modulation
+
         // Generate wave
-        // if (n.channel == 0)
         f64 sound = osc.GenerateWave(time_step, n);
 
-        // Filter
-        if (vafilter)
-            sound = m_vafilter.FilterWave(sound * amplitude);
-        else
-            sound = m_filter.FilterWave(sound * amplitude);
+        // Amplitude Modulation
+        sound = (sound * (1.0 + lfo_output)) * amplitude;
 
-        // TODO: Low Frequency Oscillator
+        // Filter
+        if (vafilter) sound = m_vafilter.FilterWave(sound);
+        else          sound = m_filter.FilterWave(sound);
 
         // TODO:  Effects
+        // TODO: Reverb
 
         sound_mixed += sound;
     }
+
+    // Normalize
+    sound_mixed /= static_cast<f64>(oscillators.size());
 
     f64 output = std::clamp(sound_mixed * m_master_volume, -1.0, 1.0);
 

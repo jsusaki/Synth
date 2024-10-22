@@ -3,6 +3,7 @@
 #include "../../Core/Common.h"
 #include <algorithm>
 #include <complex>
+#include <vector>
 
 // Filter: https://en.wikipedia.org/wiki/Filter_(signal_processing)
 // MusicDSP Filters: https://www.musicdsp.org/en/latest/Filters/index.html
@@ -100,8 +101,15 @@ public:
 // earlevel engineering: https://www.earlevel.com/main/2012/11/26/biquad-c-source-code/
 // BiQuadDesigner: https://arachnoid.com/BiQuadDesigner/index.html
 
-//inline f64 db_to_linear(f64 x) { return std::pow(10.0, x / 20.0); }
-inline f64 db_to_linear(f64 x) { return 20.0 * std::log10(x); }
+inline f64 db_to_linear(f64 x) { return std::pow(10.0, x / 20.0); }
+inline f64 linear_to_db(f64 x) { return 20.0 * std::log10(x); }
+inline f64 lerp(f64 a, f64 b, f64 t) { return a + (b - a) * t; }
+inline s32 wrap(s32 value, s32 max)
+{
+    if (value < 0)    return value + max;
+    if (value >= max) return value - max;
+    return value;
+}
 
 struct BqFilter
 {
@@ -139,10 +147,10 @@ struct BqFilter
         f64 sin_omega = std::sin(omega);
         f64 cos_omega = std::cos(omega);
 
-        f64 gain = db_to_linear(0.5f * gain_db);
+        f64 gain = db_to_linear(0.5 * gain_db);
 
-        f64 alpha = sin_omega / (2.0f * std::max(reso, 0.001));
-        f64 beta  = std::sqrt(2.0f * gain);
+        f64 alpha = sin_omega / (2.0 * std::max(reso, 0.001));
+        f64 beta  = std::sqrt(2.0 * gain);
 
         f64 a0 = 1.0f;
 
@@ -203,21 +211,21 @@ struct BqFilter
             break;
 
         case Type::LOW_SHELF:
-            b0 =  gain * ((gain + 1.0) - (gain - 1.0) * cos_omega + beta * sin_omega);
+            b0 =       gain * ((gain + 1.0) - (gain - 1.0) * cos_omega + beta * sin_omega);
             b1 = 2.0 * gain * ((gain - 1.0) - (gain + 1.0) * cos_omega);
-            b2 =  gain * ((gain + 1.0) - (gain - 1.0) * cos_omega - beta * sin_omega);
-            a0 = (gain + 1.0) + (gain - 1.0) * cos_omega + beta * sin_omega;
-            a1 = -2.0 * ((gain - 1.0) + (gain + 1.0) * cos_omega);
-            a2 = (gain + 1.0) + (gain - 1.0) * cos_omega - beta * sin_omega;            
+            b2 =       gain * ((gain + 1.0) - (gain - 1.0) * cos_omega - beta * sin_omega);
+            a0 =               (gain + 1.0) + (gain - 1.0) * cos_omega + beta * sin_omega;
+            a1 = -2.0       * ((gain - 1.0) + (gain + 1.0) * cos_omega);
+            a2 =               (gain + 1.0) + (gain - 1.0) * cos_omega - beta * sin_omega;            
             break;
 
         case Type::HIGH_SHELF:
-            b0 =  gain * ((gain + 1.0) + (gain - 1.0) * cos_omega + beta * sin_omega);
-            b1 = -2.0 * gain * ((gain - 1.0) + (gain + 1.0) * cos_omega);
-            b2 =  gain * ((gain + 1.0) + (gain - 1.0) * cos_omega - beta * sin_omega);
-            a0 = (gain + 1.0) - (gain - 1.0) * cos_omega + beta * sin_omega;
-            a1 = 2.0 * ((gain - 1.0f) - (gain + 1.0) * cos_omega);
-            a2 = (gain + 1.0) - (gain - 1.0) * cos_omega - beta * sin_omega;
+            b0 =         gain * ((gain + 1.0) + (gain - 1.0) * cos_omega + beta * sin_omega);
+            b1 = -2.0 *  gain * ((gain - 1.0) + (gain + 1.0) * cos_omega);
+            b2 =         gain * ((gain + 1.0) + (gain - 1.0) * cos_omega - beta * sin_omega);
+            a0 =                 (gain + 1.0) - (gain - 1.0) * cos_omega + beta * sin_omega;
+            a1 = 2.0          * ((gain - 1.0) - (gain + 1.0) * cos_omega);
+            a2 =                 (gain + 1.0) - (gain - 1.0) * cos_omega - beta * sin_omega;
             break;
         }
 
@@ -268,3 +276,55 @@ struct BqFilter
     }
 };
 
+
+// For reverb effect
+struct CombFilter 
+{
+    std::vector<f64> history;
+    s32 history_offset = 0;
+    f64 feedback = 0.0;
+    f64 damp = 0.0;
+
+    f64 state = 0.0;
+
+    void SetDelay(s32 delay_in_samples) 
+    {
+        history.resize(delay_in_samples);
+        history_offset %= history.size();
+    }
+
+    f64 Process(f64 const& x)
+    {
+        f64 y = history[history_offset];
+        state = lerp(y, state, damp);
+
+        history[history_offset] = x + feedback * state;
+        history_offset = wrap(history_offset + 1, history.size());
+
+        return y;
+    }
+};
+
+struct AllPassFilter 
+{
+    std::vector<f64> history;
+    s32 history_offset = 0;
+    f64 feedback = 0.0;
+
+    void SetDelay(s32 delay_in_samples) 
+    {
+        history.resize(delay_in_samples);
+        history_offset %= history.size();
+    }
+
+    f64 Process(f64 const& x) 
+    {
+        f64 old = history[history_offset];
+        f64 y = -x + old;
+
+        history[history_offset] = x + feedback * old;
+        history_offset = wrap(history_offset + 1, history.size());
+
+        return y;
+    }
+};

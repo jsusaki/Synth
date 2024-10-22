@@ -92,52 +92,32 @@ public:
             static s32 wf2 = static_cast<s32>(synth.GetOscillator("OSC2").m_waveform);
             static s32 wf3 = static_cast<s32>(synth.GetOscillator("OSC3").m_waveform);
             static bool mute1 = false, mute2 = false, mute3 = false;
-            Oscillator(synth.GetOscillator("OSC1"), "OSC1", wf1, mute1);
-            Oscillator(synth.GetOscillator("OSC2"), "OSC2", wf2, mute2);
-            Oscillator(synth.GetOscillator("OSC3"), "OSC3", wf3, mute3);
+            DefaultOscillator(synth.GetOscillator("OSC1"), "OSC1", wf1, mute1);
+            DefaultOscillator(synth.GetOscillator("OSC2"), "OSC2", wf2, mute2);
+            DefaultOscillator(synth.GetOscillator("OSC3"), "OSC3", wf3, mute3);
 
             // Oscilloscope
             Oscilloscope(synth);
 
             // Note Info
-            ImGui::Begin("Notes");
-            {
-                std::string f, s;
-                for (auto& n : synth.notes)
-                {
-                    f += std::format("{:.2f} ", note_to_freq(n.id));
-                    s += std::format("{} ",     note_str(n.id));
-                }
+            Notes(synth);
 
-                ImGui::Text("Frequency (Hz): %s", f.c_str());
-                ImGui::Text("Note            %s", s.c_str());
-                ImGui::Text("Notes           %d", synth.notes.size());
-            }
-            ImGui::End();
+            // Amplitude Envelope
+            static s32 decay_function = static_cast<s32>(synth.m_amp_envelope.decay_function);
+            Envelope(synth.m_amp_envelope, decay_function, "Amplitude Envelope");
 
-            // Envelope
-            static s32 decay_function = static_cast<s32>(synth.m_envelope.decay_function);
-            Envelope(synth, decay_function);
+            // TODOL Filter Envelope
 
             // Volume
             Mixer(synth);
 
-            // Filter Selection
-            ImGui::Begin("Filter Type");
-            {
-                static s32 filter = synth.vafilter;
-                ImGui::Text("Filter Type: "); ImGui::SameLine();
-                ImGui::RadioButton("BIQUAD", &filter, 0); ImGui::SameLine();
-                ImGui::RadioButton("VA", &filter, 1);
-                synth.vafilter = static_cast<bool>(filter);
-            }
-            ImGui::End();
-
             // Filter
-            if (synth.vafilter)
-                VAFilter(synth);
-            else
-                BqFilter(synth);
+            Filter(synth);
+        
+            // Low Frequency Oscillator
+            static s32 wflfo    = static_cast<s32>(synth.m_lfo.m_waveform);
+            static bool mutelfo = false;
+            LowFrequencyOscillator(synth.m_lfo, "LFO", wflfo, mutelfo);
         }
     }
 
@@ -172,6 +152,24 @@ public:
             ImGui::Checkbox("Show ImPlot Demo", &show_implot_demo);
             if (show_imgui_demo)  ImGui::ShowDemoWindow();
             if (show_implot_demo) ImPlot::ShowDemoWindow();
+        }
+        ImGui::End();
+    }
+
+    void Notes(Synthesizer& synth)
+    {
+        ImGui::Begin("Notes");
+        {
+            std::string f, s;
+            for (auto& n : synth.notes)
+            {
+                f += std::format("{:.2f} ", note_to_freq(n.id));
+                s += std::format("{} ", note_str(n.id));
+            }
+
+            ImGui::Text("Frequency (Hz): %s", f.c_str());
+            ImGui::Text("Note            %s", s.c_str());
+            ImGui::Text("Notes           %d", synth.notes.size());
         }
         ImGui::End();
     }
@@ -218,9 +216,9 @@ public:
         ImGui::End();
     }
 
-    void Envelope(Synthesizer& synth,s32& decay_function)
+    void Envelope(Envelope& env,s32& decay_function, std::string name)
     {
-        ImGui::Begin("Envelope Generator");
+        ImGui::Begin(name.c_str());
         {
             ImGui::Text(" A   D   S   R"); ImGui::SameLine();
             ImGui::BeginGroup(); ImGui::SameLine();
@@ -230,12 +228,12 @@ public:
             ImGui::EndGroup();
 
             ImVec2 slider_size(20, 300);
-            VSliderDouble("##A", slider_size, &synth.m_envelope.attack_time, 0.0, 10.0, "%.2f");      ImGui::SameLine();
-            VSliderDouble("##D", slider_size, &synth.m_envelope.decay_time, 0.0, 10.0, "%.2f");       ImGui::SameLine();
-            VSliderDouble("##S", slider_size, &synth.m_envelope.sustain_amplitude, 0.0, 1.0, "%.2f"); ImGui::SameLine();
-            VSliderDouble("##R", slider_size, &synth.m_envelope.release_time, 0.0, 10.0, "%.2f");     ImGui::SameLine();
+            VSliderDouble("##A", slider_size, &env.attack_time, 0.0, 10.0, "%.2f");      ImGui::SameLine();
+            VSliderDouble("##D", slider_size, &env.decay_time, 0.0, 10.0, "%.2f");       ImGui::SameLine();
+            VSliderDouble("##S", slider_size, &env.sustain_amplitude, 0.0, 1.0, "%.2f"); ImGui::SameLine();
+            VSliderDouble("##R", slider_size, &env.release_time, 0.0, 10.0, "%.2f");     ImGui::SameLine();
 
-            synth.m_envelope.decay_function = static_cast<Envelope::Decay>(decay_function);
+            env.decay_function = static_cast<Envelope::Decay>(decay_function);
 
             // Compute ADSR parametric curve
             const s32 sample_size = 1000;
@@ -251,7 +249,7 @@ public:
                 f64 t = i * time_step;
                 if (i == 600) note_off_time = global_time;
 
-                f64 amplitude = synth.m_envelope.GenerateAmplitude(global_time, note_on_time, note_off_time);
+                f64 amplitude = env.GenerateAmplitude(global_time, note_on_time, note_off_time);
 
                 ts[i] = i;
                 as[i] = amplitude;
@@ -275,7 +273,7 @@ public:
         ImGui::End();
     }
 
-    void Oscillator(Oscillator& osc, std::string label, s32& waveform, bool& mute)
+    void DefaultOscillator(Oscillator& osc, std::string label, s32& waveform, bool& mute)
     {
         ImVec2 osc_slider_size(20, 150);
         ImGui::Begin(label.c_str());
@@ -301,12 +299,59 @@ public:
         ImGui::End();
     }
 
+    void LowFrequencyOscillator(Oscillator& osc, std::string label, s32& waveform, bool& mute)
+    {
+        ImVec2 osc_slider_size(20, 150);
+        ImGui::Begin(label.c_str());
+        {
+            ImGui::Text(" P   V   F   A"); ImGui::SameLine();
+
+            ImGui::Checkbox("Mute", &osc.m_mute);
+
+            ImGui::VSliderInt("##P", osc_slider_size, &osc.m_pitch, -24, 48);            ImGui::SameLine();
+            VSliderDouble("##V",     osc_slider_size, &osc.m_volume, 0.0, 1.0);          ImGui::SameLine();
+            VSliderDouble("##F",     osc_slider_size, &osc.m_wave.frequency, 0.0, 20.0); ImGui::SameLine();
+            VSliderDouble("##A",     osc_slider_size, &osc.m_wave.amplitude, 0.0, 0.01); ImGui::SameLine();
+
+            ImGui::BeginGroup();
+            ImGui::RadioButton("SINE",     &waveform, static_cast<s32>(Oscillator::Type::WAVE_SINE));
+            ImGui::RadioButton("SQUARE",   &waveform, static_cast<s32>(Oscillator::Type::WAVE_SQUARE));
+            ImGui::RadioButton("TRIANGLE", &waveform, static_cast<s32>(Oscillator::Type::WAVE_TRIANGLE));
+            ImGui::RadioButton("DIGI SAW", &waveform, static_cast<s32>(Oscillator::Type::WAVE_DIGI_SAWTOOTH));
+            ImGui::RadioButton("ANLG SAW", &waveform, static_cast<s32>(Oscillator::Type::WAVE_ANLG_SAWTOOTH));
+            ImGui::RadioButton("WHITE",    &waveform, static_cast<s32>(Oscillator::Type::NOISE_WHITE));
+            ImGui::EndGroup();
+
+            osc.m_waveform = static_cast<Oscillator::Type>(waveform);
+        }
+        ImGui::End();
+    }
+
+    void Filter(Synthesizer& synth)
+    {
+        ImGui::Begin("Filter Type");
+        {
+            static s32 filter = synth.vafilter;
+            ImGui::Text("Filter Type: "); ImGui::SameLine();
+            ImGui::RadioButton("BIQUAD", &filter, 0); ImGui::SameLine();
+            ImGui::RadioButton("VA", &filter, 1);
+            synth.vafilter = static_cast<bool>(filter);
+        }
+        ImGui::End();
+
+        // Filter
+        if (synth.vafilter)
+            VAFilter(synth);
+        else
+            BqFilter(synth);
+    }
+
     void BqFilter(Synthesizer& synth)
     {
         ImGui::Begin("Biquad Filter");
         {
-            static f64 resonance = 0.7;
-            static f64 cutoff_freq = 10000.0;
+            static f64 resonance = 0.5;
+            static f64 cutoff_freq = 2000.0;
             static s32 filter_type = static_cast<s32>(synth.m_filter.type);
 
             // Store previous values
@@ -355,7 +400,7 @@ public:
                 frequencies[i] = freq;
 
                 f64 mag = synth.m_filter.TransferFunction(freq);
-                if (mag > 0.0) magnitudes[i] = db_to_linear(mag);
+                if (mag > 0.0) magnitudes[i] = linear_to_db(mag);
                 else           magnitudes[i] = -100.0;
             }
 
@@ -363,10 +408,10 @@ public:
             static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
             if (ImPlot::BeginPlot("Amplitude Response", ImVec2(plot_size)))
             {
-                ImPlot::SetupAxes("Frequency (Hz) Log", "Gain (dB)", 0, ImPlotAxisFlags_AutoFit);
+                ImPlot::SetupAxes("Frequency (Hz)", "Gain (dB)", 0, ImPlotAxisFlags_AutoFit);
                 ImPlot::SetupAxisLimits(ImAxis_X1, 20.0, nyquist_freq, ImGuiCond_Always);
                 ImPlot::SetupAxisLimits(ImAxis_Y1, -100, 10, ImGuiCond_Always); // Y-axis limits for dB (-100 dB to 10 dB)
-                ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Log10);           // Logarithmic scale frequency (Hz)
+                //ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Log10);           // Logarithmic scale frequency (Hz)
 
                 ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 3.0f);
                 ImPlot::PlotLine("##Filter Frequency", frequencies.data(), magnitudes.data(), frequencies.size());
@@ -381,8 +426,8 @@ public:
     {
         ImGui::Begin("VA Filter");
         {
-            static f64 resonance = 0.7;
-            static f64 cutoff_freq = 10000.0;
+            static f64 resonance = 0.5;
+            static f64 cutoff_freq = 2000.0;
             static s32 filter_type = static_cast<s32>(synth.m_filter.type);
 
             // Store previous values
@@ -391,7 +436,7 @@ public:
             static s32 prev_filter_type = filter_type;
 
             ImGui::Text("   C     R   "); ImGui::SameLine();
-            ImGui::BeginGroup();   ImGui::SameLine();
+            ImGui::BeginGroup();          ImGui::SameLine();
 
             ImGui::RadioButton("LPF",  &filter_type, static_cast<s32>(VAFilter::Type::LOW_PASS));   ImGui::SameLine();
             ImGui::RadioButton("HPF",  &filter_type, static_cast<s32>(VAFilter::Type::HIGH_PASS));  ImGui::SameLine();
@@ -416,18 +461,17 @@ public:
             }
 
             // Plot Frequency Response: Amplitude Response
-            f64 sample_rate = 44100.0;
-            f64 nyquist_freq = sample_rate / 2.0;
-            s32 sample_size  = 2000;
-            std::vector<f64> frequencies(sample_size, 0.0);
-            std::vector<f64> magnitudes(sample_size, 0.0); // dB
+            f64 nyquist_freq = SAMPLE_RATE / 2.0;
+            const s32 sample_size = 1000;
+            std::vector<f64> frequencies(sample_size, 0.0); // Hz
+            std::vector<f64> magnitudes(sample_size, 0.0);  // dB
             for (s32 i = 0; i < sample_size; i++)
             {
                 f64 freq = (static_cast<f64>(i) / sample_size) * nyquist_freq;
                 frequencies[i] = freq;
 
                 f64 mag = synth.m_vafilter.TransferFunction(freq);
-                if (mag > 0.0) magnitudes[i] = db_to_linear(mag);
+                if (mag > 0.0) magnitudes[i] = linear_to_db(mag);
                 else           magnitudes[i] = -100.0;
             }
 
@@ -435,10 +479,10 @@ public:
             static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
             if (ImPlot::BeginPlot("Amplitude Response", ImVec2(plot_size)))
             {
-                ImPlot::SetupAxes("Frequency (Hz) Log", "Gain (dB)", 0, ImPlotAxisFlags_AutoFit);
+                ImPlot::SetupAxes("Frequency (Hz)", "Gain (dB)", 0, ImPlotAxisFlags_AutoFit);
                 ImPlot::SetupAxisLimits(ImAxis_X1, 20.0, nyquist_freq, ImGuiCond_Always);
                 ImPlot::SetupAxisLimits(ImAxis_Y1, -100, 10, ImGuiCond_Always); // Y-axis limits for dB (-100 dB to 10 dB)
-                ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Log10);            // Logarithmic x-axis scale
+                //ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Log10);         // Logarithmic scale frequency (Hz)
 
                 ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 3.0f);
                 ImPlot::PlotLine("##Filter Frequency", frequencies.data(), magnitudes.data(), frequencies.size());
