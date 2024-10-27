@@ -10,9 +10,8 @@
 #include "Random.h"
 #include "Window.h"
 #include "Input.h"
-#include "../GUI/GUI.h"
-#include "../GUI/Piano.h"
 #include "../Audio/AudioEngine.h"
+#include "../GUI/GUI.h"
 
 
 class Application
@@ -33,7 +32,6 @@ private: // Main functions
 
 private: // Helper functions
     void UpdateFrameTime();
-    void ProcessNoteInput(f64 time, s32 key, u32 note_id, std::vector<note>& notes);
 
 private: // Internal
     // Timing
@@ -52,6 +50,4 @@ private: // Internal
 private: // Simulation variables
     AudioEngine m_audio;
     GUI m_gui;
-    Piano m_piano;
-    bool show = true;
 };

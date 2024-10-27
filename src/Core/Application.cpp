@@ -75,61 +75,11 @@ bool Application::ShutDown()
 void Application::Create()
 {
     m_audio.Init(44100, 2, 8, SAMPLE_RATE/100);
+
+    // How do we link synth + application?
     m_gui.Init(m_window.GetWindow());
 }
 
-// TODO: incorporate into audio control
-void Application::ProcessNoteInput(f64 time, s32 key, u32 note_id, std::vector<note>& notes)
-{
-    Input& input = Input::Instance();
-
-    // Check if note is already active
-
-    auto noteFound = std::find_if(notes.begin(), notes.end(), [note_id](const note& n) { return n.id == note_id; });
-    if (noteFound == notes.end())
-    {
-        if (input.IsKeyHeld(key))
-        {
-            // Note is not active, so create and add a new note
-            note n;
-            n.id = note_id;
-            n.on = time;
-            n.off = -1.0;
-            n.channel = 0;
-            n.active = true;
-            notes.emplace_back(n);
-
-            // UI link
-            m_piano.down(note_id, 1);
-            //std::cout << note_id << std::endl;
-        }
-    }
-    else
-    {
-        if (input.IsKeyHeld(key))
-        {
-            // Key is still held, so do nothing
-            if (noteFound->off > noteFound->on)
-            {
-                // Key has been pressed again during release phase
-                noteFound->on = time;
-                noteFound->active = true;
-
-                // UI link
-                m_piano.down(noteFound->id, 1);
-            }
-        }
-        else
-        {
-            if (noteFound->off < noteFound->on)
-                noteFound->off = time;
-
-            // UI link
-            m_piano.up(noteFound->id);
-            //std::cout << note_id << std::endl;
-        }
-    }
-}
 
 void Application::ProcessInput()
 {
@@ -142,50 +92,23 @@ void Application::ProcessInput()
 
     if (input.IsKeyPressed(GLFW_KEY_SPACE))
     {
-        m_audio.synth.TogglePlay();
-        m_gui.Play(m_audio.synth.IsPlaying());
+        //m_audio.synth.TogglePlay();
+        //m_gui.Play(m_audio.synth.IsPlaying());
     }
 
-    // Control variables
-    static s32 octave = 4*12;
-
     f64 time_step = m_audio.Timestep();
-    std::vector<note>& notes = m_audio.synth.GetNotes();
+    m_audio.synth.ProcessInput(time_step);
 
-    // Synth Control
-    // Keyboard Control
-    ProcessNoteInput(time_step, GLFW_KEY_Z,        0+octave,    notes);
-    ProcessNoteInput(time_step, GLFW_KEY_S,        1+octave,    notes);
-    ProcessNoteInput(time_step, GLFW_KEY_X,        2+octave,    notes);
-    ProcessNoteInput(time_step, GLFW_KEY_D,        3+octave,    notes);
-    ProcessNoteInput(time_step, GLFW_KEY_C,        4+octave,    notes);
-    ProcessNoteInput(time_step, GLFW_KEY_V,        5+octave,    notes);
-    ProcessNoteInput(time_step, GLFW_KEY_G,        6+octave,    notes);
-    ProcessNoteInput(time_step, GLFW_KEY_B,        7+octave,    notes);
-    ProcessNoteInput(time_step, GLFW_KEY_H,        8+octave,    notes);
-    ProcessNoteInput(time_step, GLFW_KEY_N,        9+octave,    notes);
-    ProcessNoteInput(time_step, GLFW_KEY_J,        10+octave,   notes);
-    ProcessNoteInput(time_step, GLFW_KEY_M,        11+octave,   notes);
-    ProcessNoteInput(time_step, GLFW_KEY_COMMA,    0+octave+12, notes);
-    ProcessNoteInput(time_step, GLFW_KEY_L,        1+octave+12, notes);
-    ProcessNoteInput(time_step, GLFW_KEY_PERIOD,   2+octave+12, notes);
-    ProcessNoteInput(time_step, GLFW_KEY_SEMICOLON,3+octave+12, notes);
-    ProcessNoteInput(time_step, GLFW_KEY_SLASH,    4+octave+12, notes);
-
-    // Pitch Control
-    if (input.IsKeyPressed(GLFW_KEY_LEFT))  octave -= 12;
-    if (input.IsKeyPressed(GLFW_KEY_RIGHT)) octave += 12;
-    if (octave < 0) octave = 0;
-
-    if (input.IsKeyPressed(GLFW_KEY_TAB)) notes.clear();
-
+    /*
+    // TODO: mouse piano press
     if (!m_gui.IsWindowFocused())
     {
-        if (input.IsButtonPressed(GLFW_MOUSE_BUTTON_LEFT))   {}
+        if (input.IsButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {}
         if (input.IsButtonPressed(GLFW_MOUSE_BUTTON_MIDDLE)) {}
         if (input.IsButtonPressed(GLFW_MOUSE_BUTTON_RIGHT)) {}
         if (input.GetMouseWheel() != 0) { input.ResetMouseWheel(); }
     }
+    */
 
     // Update input state
     input.Update();
@@ -210,10 +133,8 @@ void Application::Render()
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 
-    // Render Midi keyboard
-    m_piano.Render(&show);
-
     // Render GUI
+    m_audio.synth.Render();
     m_gui.Render();
 }
 

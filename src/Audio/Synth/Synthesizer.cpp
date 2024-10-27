@@ -92,9 +92,102 @@ f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
     return output;
 }
 
+void Synthesizer::ProcessNoteInput(f64 time, s32 key, s32 note_id)
+{
+    Input& input = Input::Instance();
+
+    // Check if note is already active
+    auto note_found = std::find_if(notes.begin(), notes.end(), [note_id](const note& n) { return n.id == note_id; });
+    if (note_found == notes.end())
+    {
+        if (input.IsKeyHeld(key))
+        {
+            // Note is not active, so create and add a new note
+            note n;
+            n.id = note_id;
+            n.on = time;
+            n.off = -1.0;
+            n.channel = 0;
+            n.active = true;
+            notes.emplace_back(n);
+
+            // UI link
+            m_piano.down(note_id, 1);
+            //std::cout << note_id << std::endl;
+        }
+    }
+    else
+    {
+        if (input.IsKeyHeld(key))
+        {
+            // Key is still held, so do nothing
+            if (note_found->off > note_found->on)
+            {
+                // Key has been pressed again during release phase
+                note_found->on = time;
+                note_found->active = true;
+
+                // UI link
+                m_piano.down(note_found->id, 1);
+            }
+        }
+        else
+        {
+            if (note_found->off < note_found->on)
+                note_found->off = time;
+
+            // UI link
+            m_piano.up(note_found->id);
+            //std::cout << note_id << std::endl;
+        }
+    }
+}
+
+void Synthesizer::ProcessInput(f64 time)
+{
+    Input& input = Input::Instance();
+
+    // Control variables
+    static s32 octave = 4 * 12;
+
+    // Synth Control
+    // Keyboard Control
+    // TODO: integrate press and release in synth
+    ProcessNoteInput(time, GLFW_KEY_Z, 0 + octave);
+    ProcessNoteInput(time, GLFW_KEY_S, 1 + octave);
+    ProcessNoteInput(time, GLFW_KEY_X, 2 + octave);
+    ProcessNoteInput(time, GLFW_KEY_D, 3 + octave);
+    ProcessNoteInput(time, GLFW_KEY_C, 4 + octave);
+    ProcessNoteInput(time, GLFW_KEY_V, 5 + octave);
+    ProcessNoteInput(time, GLFW_KEY_G, 6 + octave);
+    ProcessNoteInput(time, GLFW_KEY_B, 7 + octave);
+    ProcessNoteInput(time, GLFW_KEY_H, 8 + octave);
+    ProcessNoteInput(time, GLFW_KEY_N, 9 + octave);
+    ProcessNoteInput(time, GLFW_KEY_J, 10 + octave);
+    ProcessNoteInput(time, GLFW_KEY_M, 11 + octave);
+    ProcessNoteInput(time, GLFW_KEY_COMMA, 0 + octave + 12);
+    ProcessNoteInput(time, GLFW_KEY_L, 1 + octave + 12);
+    ProcessNoteInput(time, GLFW_KEY_PERIOD, 2 + octave + 12);
+    ProcessNoteInput(time, GLFW_KEY_SEMICOLON, 3 + octave + 12);
+    ProcessNoteInput(time, GLFW_KEY_SLASH, 4 + octave + 12);
+
+    // Pitch Control
+    if (input.IsKeyPressed(GLFW_KEY_LEFT))  octave -= 12;
+    if (input.IsKeyPressed(GLFW_KEY_RIGHT)) octave += 12;
+    if (octave < 0) octave = 0;
+
+    if (input.IsKeyPressed(GLFW_KEY_TAB)) notes.clear();
+}
+
 void Synthesizer::Update(f64 time)
 {
 	notes.erase(std::remove_if(notes.begin(), notes.end(), [](const note& n) { return !n.active; }), notes.end());
+}
+
+void Synthesizer::Render()
+{
+    // Render Midi keyboard
+    m_piano.Render();
 }
 
 void Synthesizer::TogglePlay()

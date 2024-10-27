@@ -29,7 +29,7 @@ public:
 public:
     f64 GenerateWave(f64 time_step, note n)
     {
-        m_wave.frequency = note_to_freq(n.id + m_pitch);
+        m_wave.frequency = note_freq(n.id + m_pitch);
         f64 output = GenerateWave(time_step, m_wave.amplitude, m_wave.frequency);
         return output;
     }

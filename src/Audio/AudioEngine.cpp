@@ -36,6 +36,7 @@ void AudioEngine::Shutdown()
     m_driver->Close();
 }
 
+// Called inside the: driver.FillOutputBuffer(void* pOutput, u32 frameCount)
 std::vector<f64>& AudioEngine::ProcessOutputBlock(u32 frame_count)
 {
     for (u32 frame = 0; frame < frame_count; frame++)
@@ -55,7 +56,6 @@ std::vector<f64>& AudioEngine::ProcessOutputBlock(u32 frame_count)
                 n.active = false;
         }
         
-        // TODO: review mixing method: do we need to normalize?
         mixed_output = std::clamp(mixed_output, -1.0, 1.0);
         synth.UpdateWaveData(frame, mixed_output);
 

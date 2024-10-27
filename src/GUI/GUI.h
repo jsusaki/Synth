@@ -8,7 +8,7 @@
 #include "imgui-knobs.h"
 
 #include "../Core/Common.h"
-#include "../Audio/AudioEngine.h"
+#include "../Audio/Synth/Synthesizer.h"
 
 struct ScrollingBuffer 
 {
@@ -163,8 +163,8 @@ public:
             std::string f, s;
             for (auto& n : synth.notes)
             {
-                f += std::format("{:.2f} ", note_to_freq(n.id));
-                s += std::format("{} ", note_str(n.id));
+                f += std::format("{:.2f} ", note_freq(n.id));
+                s += std::format("{} ", note_name(n.id));
             }
 
             ImGui::Text("Frequency (Hz): %s", f.c_str());

@@ -93,6 +93,7 @@
     <IntDir>$(ProjectDir)build\$(Configuration)\obj\</IntDir>
     <IncludePath>D:\git\projects\Synth\Synth\include;D:\git\projects\Synth\Synth\lib;D:\git\projects\Synth\Synth\lib\glad\include;D:\git\projects\Synth\Synth\lib\glfw\include;D:\git\projects\Synth\Synth\lib\glm;D:\git\projects\Synth\Synth\lib\imgui;D:\git\projects\Synth\Synth\lib\miniaudio;D:\git\projects\Synth\Synth\lib\imgui\backends;D:\git\projects\Synth\Synth\lib\imgui\misc;$(IncludePath)</IncludePath>
     <LibraryPath>D:\git\projects\Synth\Synth\lib\glfw\lib;C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\Llvm\lib;$(LibraryPath)</LibraryPath>
+    <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -138,6 +139,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,6 +158,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

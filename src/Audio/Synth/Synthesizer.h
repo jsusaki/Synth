@@ -62,8 +62,11 @@
 
 #include <vector>
 #include <unordered_map>
+#include <glfw3.h>
 
 #include "../../Core/Common.h"
+#include "../../Core/Input.h"
+#include "../../GUI/Piano.h"
 
 #include "Oscillator.h"
 #include "Envelope.h"
@@ -72,10 +75,11 @@
 // FEATURES
 	// TODO: Low-Frequency Oscillator
 	// TODO: Filter Envelope
-
 	// TODO: Effects: Reverb, Chorus, Delay
+
 	// TODO: Basic Instruments
 	// TODO: Sequencer
+
 	// TODO: Spectrogram (FFT)
 	// TODO: Track
 	// TODO: Record
@@ -123,8 +127,13 @@ public:
 	Synthesizer();
 
 public:
-	f64 Synthesize(f64 time_step, note n, bool& note_finished);
+	void ProcessInput(f64 time);
 	void Update(f64 time);
+	void Render();
+
+	f64 Synthesize(f64 time_step, note n, bool& note_finished);
+	// TODO: reduce to press and release, define the key map elsewhere in the application
+	void ProcessNoteInput(f64 time, s32 key, s32 note_id);
 
 public:
 	void TogglePlay();
@@ -159,4 +168,5 @@ public:
 	WaveData wave_data;
 
 	bool vafilter = false;
+	Piano m_piano;
 };
