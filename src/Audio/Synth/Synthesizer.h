@@ -71,11 +71,15 @@
 #include "Oscillator.h"
 #include "Envelope.h"
 #include "Filter.h"
+#include "Reverb.h"
 
 // FEATURES
-	// TODO: Low-Frequency Oscillator
+	// TODO: Low-Frequency Oscillator: Frequency Modulation
+
 	// TODO: Filter Envelope
-	// TODO: Effects: Reverb, Chorus, Delay
+	// TODO: Effects: Reverb
+	// TODO: Effects: Chorus, Delay
+	// TODO: Effects: Delay
 
 	// TODO: Basic Instruments
 	// TODO: Sequencer
@@ -91,6 +95,9 @@
 
 // IMPROVEMENTS
 	// TODO: Oscilloscope improvement
+
+// REFACTORS
+	// TODO: Synth Input Scheme: reduce to press and release, define the key map elsewhere in the application
 
 // BUGS
 
@@ -111,6 +118,7 @@
 	// DONE: Filters: Low Pass, High Pass, Bandpass: VAFilter, BqFilter
 	// DONE: Filter Graph 
 	// BUG SOLVED: Sine Wave Clipping in ADSR: Release to Attack; sound engineering problem: attenuate with filter
+	// DONE: Low-Frequency Oscillator: Amplitude Modulation
 
 struct WaveData
 {
@@ -169,4 +177,6 @@ public:
 
 	bool vafilter = false;
 	Piano m_piano;
+
+	ReverbEffect m_reverb;
 };

@@ -118,6 +118,9 @@ public:
             static s32 wflfo    = static_cast<s32>(synth.m_lfo.m_waveform);
             static bool mutelfo = false;
             LowFrequencyOscillator(synth.m_lfo, "LFO", wflfo, mutelfo);
+
+            // Reverb
+            ReverbEffect(synth);
         }
     }
 
@@ -488,6 +491,56 @@ public:
                 ImPlot::PlotLine("##Filter Frequency", frequencies.data(), magnitudes.data(), frequencies.size());
                 ImPlot::PopStyleVar();
                 ImPlot::EndPlot();
+            }
+        }
+        ImGui::End();
+    }
+
+
+    void ReverbEffect(Synthesizer& synth)
+    {
+        ImGui::Begin("Reverb");
+        {
+            static f64 room   = 1.0;
+            static f64 spread = 0.2;
+            static f64 damp   = 0.2;
+            static f64 decay  = 1.0;
+            static f64 dry    = 0.0;
+            static f64 wet    = 0.0;
+
+            static f64 prev_room = room;
+            static f64 prev_spread = spread;
+            static f64 prev_damp = damp;
+            static f64 prev_decay = decay;
+            static f64 prev_dry = dry;
+            static f64 prev_wet = wet;
+
+            ImVec2 osc_slider_size(20, 150);
+            ImGui::Text("RM  SPR DMP DCY DRY WET");
+            VSliderDouble("##R",  osc_slider_size, &room,   0.1, 10.0); ImGui::SameLine();
+            VSliderDouble("##S",  osc_slider_size, &spread, 0.1, 1.0);  ImGui::SameLine();
+            VSliderDouble("##DA", osc_slider_size, &damp,   0.0, 1.0);  ImGui::SameLine();
+            VSliderDouble("##DC", osc_slider_size, &decay,  0.1, 1.0);  ImGui::SameLine();
+            VSliderDouble("##DR", osc_slider_size, &dry,   -60.0, 0.0); ImGui::SameLine();
+            VSliderDouble("##WT", osc_slider_size, &wet,   -60.0, 0.0); ImGui::SameLine();
+
+            if (room != prev_room || spread != prev_spread || damp != prev_damp || decay != prev_decay || dry != prev_dry || wet != prev_wet)
+            {
+                synth.m_reverb.room   = room;
+                synth.m_reverb.spread = spread;
+                synth.m_reverb.damp   = damp;
+                synth.m_reverb.decay  = decay;
+                synth.m_reverb.dry    = dry;
+                synth.m_reverb.wet    = wet;
+
+                synth.m_reverb.ComputeFilterDelays();
+
+                prev_room   = room;
+                prev_spread = spread;
+                prev_damp   = damp;
+                prev_decay  = decay;
+                prev_dry    = dry;
+                prev_wet    = wet;
             }
         }
         ImGui::End();

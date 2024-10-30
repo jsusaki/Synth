@@ -44,6 +44,16 @@ Synthesizer::Synthesizer()
     };
     m_vafilter.CalcCoefs(2000.0, 0.5);
 
+    // Reverb Effect
+    m_reverb.room   = 1.0;
+    m_reverb.spread = 0.2;
+    m_reverb.damp   = 0.2;
+    m_reverb.decay  = 1.0;
+    m_reverb.dry    = 0.0;
+    m_reverb.wet    = 0.0;
+
+    m_reverb.ComputeFilterDelays();
+
     // Data
     wave_data.times.resize(SAMPLE_RATE/100, 0.0);
     wave_data.samples.resize(SAMPLE_RATE/100, 0.0);
@@ -53,11 +63,8 @@ f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
 {
     // Amplitude Envelope
     f64 amplitude = m_amp_envelope.GenerateAmplitude(time_step, n.on, n.off);
-    if (amplitude <= 0.00001)
-    {
+    if (amplitude <= 0.0000001)
         note_finished = true;
-        return 0.0;
-    }
     
     // Low Frequency Oscillator
     f64 lfo_output = m_lfo.GenerateWave(time_step, m_lfo.m_wave.amplitude, m_lfo.m_wave.frequency);
@@ -78,15 +85,12 @@ f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
         if (vafilter) sound = m_vafilter.FilterWave(sound);
         else          sound = m_filter.FilterWave(sound);
 
-        // TODO:  Effects
-        // TODO: Reverb
-
         sound_mixed += sound;
     }
 
     // Normalize
     sound_mixed /= static_cast<f64>(oscillators.size());
-
+ 
     f64 output = std::clamp(sound_mixed * m_master_volume, -1.0, 1.0);
 
     return output;
@@ -109,7 +113,7 @@ void Synthesizer::ProcessNoteInput(f64 time, s32 key, s32 note_id)
             n.off = -1.0;
             n.channel = 0;
             n.active = true;
-            notes.emplace_back(n);
+            notes.push_back(n);
 
             // UI link
             m_piano.down(note_id, 1);

@@ -174,6 +174,7 @@ struct BqFilter
             a2 =   1.0 - alpha;
             break;
 
+        // TODO: Does not work as intended...
         case Type::BAND_PASS:
             b0 =  alpha;
             b1 =  0.0;
@@ -293,7 +294,7 @@ struct CombFilter
         history_offset %= history.size();
     }
 
-    f64 Process(f64 const& x)
+    f64 Process(const f64 x)
     {
         f64 y = history[history_offset];
         state = lerp(y, state, damp);
@@ -317,7 +318,7 @@ struct AllPassFilter
         history_offset %= history.size();
     }
 
-    f64 Process(f64 const& x) 
+    f64 Process(const f64 x)
     {
         f64 old = history[history_offset];
         f64 y = -x + old;
