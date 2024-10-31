@@ -1046,6 +1046,9 @@
     <ClInclude Include="src\Audio\Synth\Reverb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Audio\Synth\Delay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="lib\glm\detail\func_common.inl">

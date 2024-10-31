@@ -499,6 +499,7 @@
     <ClInclude Include="lib\miniaudio\miniaudio.h" />
     <ClInclude Include="src\Audio\Driver\AudioDriver.h" />
     <ClInclude Include="src\Audio\AudioEngine.h" />
+    <ClInclude Include="src\Audio\Synth\Delay.h" />
     <ClInclude Include="src\Audio\Synth\Envelope.h" />
     <ClInclude Include="src\Audio\Synth\Filter.h" />
     <ClInclude Include="src\Audio\Synth\FrequencyModulator.h" />

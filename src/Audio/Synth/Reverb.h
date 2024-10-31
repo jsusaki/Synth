@@ -7,7 +7,7 @@
 // vallhalla DSP: https://valhalladsp.com/2021/09/20/getting-started-with-reverb-design-part-1-dev-environments/
 
 // Freeverb: https://ccrma.stanford.edu/~jos/pasp/Freeverb.html
-struct ReverbEffect
+struct Reverb
 {
 	// Freeverb constants
 	static constexpr f64 MAX_SPREAD          = 100;
@@ -53,20 +53,20 @@ struct ReverbEffect
 
 	f64 Process(f64 sample)
 	{
-		f64 linear_dry = db_to_linear(dry);
-		f64 linear_wet = db_to_linear(wet);
+		f64 linear_dry = dB_to_volume(dry);
+		f64 linear_wet = dB_to_volume(wet);
 		f64 output = 0.0;
 
 		// Apply Comb Filters in parallel
-		for (s32 f = 0; f < NUM_COMB_FILTERS; f++)
-			output += comb_filters[f].Process(sample);
+		for (s32 i = 0; i < NUM_COMB_FILTERS; i++)
+			output += comb_filters[i].Process(sample);
 
 		// Normalize
 		output /= NUM_COMB_FILTERS;
 
 		// Apply All Pass Filters in series
-		for (s32 f = 0; f < NUM_ALLPASS_FILTERS; f++)
-			output = allpass_filters[f].Process(output);
+		for (s32 i = 0; i < NUM_ALLPASS_FILTERS; i++)
+			output = allpass_filters[i].Process(output);
 
 		// Normalize
 		output /= NUM_ALLPASS_FILTERS;

@@ -106,7 +106,7 @@ public:
             static s32 decay_function = static_cast<s32>(synth.m_amp_envelope.decay_function);
             Envelope(synth.m_amp_envelope, decay_function, "Amplitude Envelope");
 
-            // TODOL Filter Envelope
+            // TODO: Filter Envelope
 
             // Volume
             Mixer(synth);
@@ -118,6 +118,9 @@ public:
             static s32 wflfo    = static_cast<s32>(synth.m_lfo.m_waveform);
             static bool mutelfo = false;
             LowFrequencyOscillator(synth.m_lfo, "LFO", wflfo, mutelfo);
+
+            // Delay
+            DelayEffect(synth);
 
             // Reverb
             ReverbEffect(synth);
@@ -145,7 +148,6 @@ public:
     {
         ImGui::Begin("Sound Synthesizer");
         {
-            ImGui::SeparatorText("General");
             ImGui::Text("FPS: average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Text("Sample Rate (Hz): %.0f", SAMPLE_RATE);
             ImGui::Text("Channels: %d", CHANNELS);
@@ -335,7 +337,6 @@ public:
         ImGui::Begin("Filter Type");
         {
             static s32 filter = synth.vafilter;
-            ImGui::Text("Filter Type: "); ImGui::SameLine();
             ImGui::RadioButton("BIQUAD", &filter, 0); ImGui::SameLine();
             ImGui::RadioButton("VA", &filter, 1);
             synth.vafilter = static_cast<bool>(filter);
@@ -403,7 +404,7 @@ public:
                 frequencies[i] = freq;
 
                 f64 mag = synth.m_filter.TransferFunction(freq);
-                if (mag > 0.0) magnitudes[i] = linear_to_db(mag);
+                if (mag > 0.0) magnitudes[i] = volume_to_dB(mag);
                 else           magnitudes[i] = -100.0;
             }
 
@@ -474,7 +475,7 @@ public:
                 frequencies[i] = freq;
 
                 f64 mag = synth.m_vafilter.TransferFunction(freq);
-                if (mag > 0.0) magnitudes[i] = linear_to_db(mag);
+                if (mag > 0.0) magnitudes[i] = volume_to_dB(mag);
                 else           magnitudes[i] = -100.0;
             }
 
@@ -542,6 +543,23 @@ public:
                 prev_dry    = dry;
                 prev_wet    = wet;
             }
+        }
+        ImGui::End();
+    }
+
+    void DelayEffect(Synthesizer& synth)
+    {
+        ImGui::Begin("Delay");
+        {
+            static s32 steps    = 3;
+            static s32 tempo    = 120;
+            static f64 feedback = 0.7;
+
+            ImVec2 osc_slider_size(20, 150);
+            ImGui::Text("STP TMP FDBK");
+            ImGui::VSliderInt("##S", osc_slider_size, &steps, 1, 8);        ImGui::SameLine();
+            ImGui::VSliderInt("##T", osc_slider_size, &tempo, 40, 200);     ImGui::SameLine();
+            VSliderDouble("##F",     osc_slider_size, &feedback, 0.0, 1.0);
         }
         ImGui::End();
     }

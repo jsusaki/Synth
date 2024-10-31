@@ -41,21 +41,56 @@ std::vector<f64>& AudioEngine::ProcessOutputBlock(u32 frame_count)
 {
     for (u32 frame = 0; frame < frame_count; frame++)
     {
-        // TODO: clean up; synth note may go inside synth, and return a buffer of mixed outputs
         f64 mixed_output = 0.0;
         for (auto& n : synth.notes)
         {
-            f64 sample = 0.0f;
+            f64 sample = 0.0;
             bool note_finished = false;
 
-            sample = synth.Synthesize(m_global_time, n, note_finished);
+            // Amplitude Envelope
+            f64 amplitude = synth.m_amp_envelope.GenerateAmplitude(m_global_time, n.on, n.off);
+            if (amplitude <= 0.0000001)
+                note_finished = true;
+
+            // Low Frequency Oscillator
+            f64 lfo_output = synth.m_lfo.GenerateWave(m_global_time, synth.m_lfo.m_wave.amplitude, synth.m_lfo.m_wave.frequency);
+
+            // Oscillators
+            for (auto& [id, osc] : synth.oscillators)
+            {
+                // TODO: Frequency Modulation
+
+                // Generate wave
+                f64 sound = osc.GenerateWave(m_global_time, n);
+
+                // Amplitude Modulation
+                sound = (sound * (1.0 + lfo_output)) * amplitude;
+
+                // Filter
+                if (synth.vafilter) sound = synth.m_vafilter.FilterWave(sound);
+                else                sound = synth.m_filter.FilterWave(sound);
+
+                // Mix Oscillators
+                sample += sound;
+            }
+
+            // Normalize
+            sample /= static_cast<f64>(synth.oscillators.size());
+            
+            // Clamp
+            sample = std::clamp(sample * synth.m_master_volume, -1.0, 1.0);
+
+            // Mix all
             mixed_output += sample;
 
             // If the note has finished playing, deactivate it
             if (note_finished && n.off > n.on)
                 n.active = false;
         }
-        
+
+        // Delay
+        mixed_output = synth.m_delay.Process(mixed_output);
+
         // Reverb
         mixed_output = synth.m_reverb.Process(mixed_output);
 

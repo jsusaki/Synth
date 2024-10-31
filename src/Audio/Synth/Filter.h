@@ -101,8 +101,9 @@ public:
 // earlevel engineering: https://www.earlevel.com/main/2012/11/26/biquad-c-source-code/
 // BiQuadDesigner: https://arachnoid.com/BiQuadDesigner/index.html
 
-inline f64 db_to_linear(f64 x) { return std::pow(10.0, x / 20.0); }
-inline f64 linear_to_db(f64 x) { return 20.0 * std::log10(x); }
+//inline f64 db_to_volume(f64 dB) { return std::pow(10.0, dB / 20.0); }
+inline f64 dB_to_volume(f64 dB) { return std::pow(10, 0.05 * dB); }
+inline f64 volume_to_dB(f64 v) { return 20.0 * std::log10(v); }
 inline f64 lerp(f64 a, f64 b, f64 t) { return a + (b - a) * t; }
 inline s32 wrap(s32 value, s32 max)
 {
@@ -147,7 +148,7 @@ struct BqFilter
         f64 sin_omega = std::sin(omega);
         f64 cos_omega = std::cos(omega);
 
-        f64 gain = db_to_linear(0.5 * gain_db);
+        f64 gain = dB_to_volume(0.5 * gain_db);
 
         f64 alpha = sin_omega / (2.0 * std::max(reso, 0.001));
         f64 beta  = std::sqrt(2.0 * gain);
@@ -174,7 +175,6 @@ struct BqFilter
             a2 =   1.0 - alpha;
             break;
 
-        // TODO: Does not work as intended...
         case Type::BAND_PASS:
             b0 =  alpha;
             b1 =  0.0;
@@ -262,16 +262,16 @@ struct BqFilter
 
     f64 TransferFunction(f64 freq)
     {
-        f64 omega = 2.0 * PI * freq / sample_rate;
+        f64 omega     = 2.0 * PI * freq / sample_rate;
         f64 cos_omega = std::cos(omega);
         f64 sin_omega = std::sin(omega);
 
         std::complex<f64> z1 = std::polar(1.0, -omega);
         std::complex<f64> z2 = std::polar(1.0, -2.0 * omega);
 
-        std::complex<f64> numerator = b0 + b1 * z1 + b2 * z2;
+        std::complex<f64> numerator   = b0 + b1 * z1 + b2 * z2;
         std::complex<f64> denominator = 1.0 + a1 * z1 + a2 * z2;
-        std::complex<f64> gain = numerator / denominator;
+        std::complex<f64> gain        = numerator / denominator;
 
         return std::abs(gain);
     }

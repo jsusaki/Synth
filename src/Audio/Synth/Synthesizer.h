@@ -72,14 +72,14 @@
 #include "Envelope.h"
 #include "Filter.h"
 #include "Reverb.h"
+#include "Delay.h"
 
 // FEATURES
 	// TODO: Low-Frequency Oscillator: Frequency Modulation
+	// TODO: Select Audio Output Device: Enumerate and select from drop down menu
 
 	// TODO: Filter Envelope
-	// TODO: Effects: Reverb
-	// TODO: Effects: Chorus, Delay
-	// TODO: Effects: Delay
+	// TODO: Effects: Chorus
 
 	// TODO: Basic Instruments
 	// TODO: Sequencer
@@ -113,12 +113,14 @@
 	// DONE: Volume Control
 	// DONE: Midi Keyboard
 	// DONE: Envelope ADSR Visualization
-	// BUG SOLVED: After some time running the program, it introduces noise (buffer overflow?)
+	// DEBUG: After some time running the program, it introduces noise (buffer overflow?)
 	// DONE: Oscilloscope Interface
 	// DONE: Filters: Low Pass, High Pass, Bandpass: VAFilter, BqFilter
 	// DONE: Filter Graph 
-	// BUG SOLVED: Sine Wave Clipping in ADSR: Release to Attack; sound engineering problem: attenuate with filter
+	// DEBUG: Sine Wave Clipping in ADSR: Release to Attack; sound engineering problem: attenuate with filter
 	// DONE: Low-Frequency Oscillator: Amplitude Modulation
+	// DONE: Effects: Reverb
+	// DONE: Effects: Delay
 
 struct WaveData
 {
@@ -178,5 +180,6 @@ public:
 	bool vafilter = false;
 	Piano m_piano;
 
-	ReverbEffect m_reverb;
+	Delay m_delay;
+	Reverb m_reverb;
 };
