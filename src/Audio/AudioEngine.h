@@ -38,6 +38,10 @@ public: // Accessors
     const u32 Blocks() const;
     const u32 BlockSamples() const;
 
+    const std::vector<std::string> GetOutputDeviceNames();
+    void SetOutputDevice(s32 index);
+    const s32 GetOutputDevice();
+
 private: // Audio Engine Internal
     u32 m_sample_rate     = 44100;
     u32 m_channels        = 1;

@@ -8,16 +8,11 @@ Synthesizer::Synthesizer()
 
     // TODO: struct Instrument
     // Oscillator
+    // Harpischord
+    /*
     oscillators["OSC1"] = Oscillator(0.8,  0, Oscillator::Type::WAVE_SINE);
     oscillators["OSC2"] = Oscillator(0.3, 12, Oscillator::Type::WAVE_ANLG_SAWTOOTH);
     oscillators["OSC3"] = Oscillator(0.1, 24, Oscillator::Type::WAVE_ANLG_SAWTOOTH);
-
-    // LFO
-    m_lfo = Oscillator(0.01, 0, Oscillator::Type::WAVE_SINE);
-    m_lfo.m_wave.frequency = 5.0;
-    m_lfo.m_wave.amplitude = 0.01;
-
-    // ADSR
     m_amp_envelope = {
         .attack_time       = 0.3,
         .decay_time        = 1.0,
@@ -26,6 +21,25 @@ Synthesizer::Synthesizer()
         .start_amplitude   = 1.0,
         .decay_function    = Envelope::Decay::EXPONENTIAL
     };
+    */
+    // Organ
+    oscillators["OSC1"] = Oscillator(0.8,  0, Oscillator::Type::WAVE_SINE);
+    oscillators["OSC2"] = Oscillator(0.3, 12, Oscillator::Type::WAVE_SINE);
+    oscillators["OSC3"] = Oscillator(0.1, 24, Oscillator::Type::WAVE_SINE);
+    // ADSR
+    m_amp_envelope = {
+        .attack_time = 0.2,
+        .decay_time = 1.0,
+        .sustain_amplitude = 0.7,
+        .release_time = 2.0,
+        .start_amplitude = 1.0,
+        .decay_function = Envelope::Decay::EXPONENTIAL
+    };
+
+    // LFO
+    m_lfo = Oscillator(0.01, 0, Oscillator::Type::WAVE_SINE);
+    m_lfo.m_wave.frequency = 5.0;
+    m_lfo.m_wave.amplitude = 0.01;
 
     // Filter
     m_filter = {
@@ -45,10 +59,11 @@ Synthesizer::Synthesizer()
     m_vafilter.CalcCoefs(2000.0, 0.5);
 
     // Delay
-    m_delay.tempo = 120; // BPM
-    m_delay.steps = 3;
-    m_delay.feedback = 0.7;
-    m_delay.offset = 0;
+    m_delay.bpm          = 120;
+    m_delay.beat         = 3;
+    m_delay.beat_per_bar = 4;
+    m_delay.feedback     = 0.7;
+    m_delay.offset       = 0;
 
     // Reverb
     m_reverb.room   = 1.0;

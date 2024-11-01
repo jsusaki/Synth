@@ -77,7 +77,7 @@ public:
         ImPlot::CreateContext();
 	}
 
-    void Display(Synthesizer& synth)
+    void Display(Synthesizer& synth, AudioEngine &audio)
     {
         // Start the Dear ImGui frame
         ImGui_ImplOpenGL3_NewFrame();
@@ -85,7 +85,7 @@ public:
         ImGui::NewFrame();
         {
             // Info
-            General(synth);   
+            General(synth, audio);   
 
             // Oscillator
             static s32 wf1 = static_cast<s32>(synth.GetOscillator("OSC1").m_waveform);
@@ -144,14 +144,33 @@ public:
     bool IsWindowFocused() const { return ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow); }
     void Play(bool p) { play = p; }
 
-    void General(Synthesizer& synth)
+    void General(Synthesizer& synth, AudioEngine& audio)
     {
         ImGui::Begin("Sound Synthesizer");
         {
             ImGui::Text("FPS: average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::Text("Sample Rate (Hz): %.0f", SAMPLE_RATE);
             ImGui::Text("Channels: %d", CHANNELS);
-            // TODO: List Devices and select 
+
+            // Select Output Device
+            static s32 selected_idx = audio.GetOutputDevice();
+            std::vector<std::string> device_names = audio.GetOutputDeviceNames();
+            std::string combo_preview_value = device_names[selected_idx];
+
+            if (ImGui::BeginCombo("Output Device", combo_preview_value.c_str()))
+            {
+                for (s32 n = 0; n < device_names.size(); n++)
+                {
+                    const bool is_selected = (selected_idx == n);
+                    if (ImGui::Selectable(device_names[n].c_str(), is_selected))
+                    {
+                        selected_idx = n;
+                        audio.SetOutputDevice(selected_idx);
+                    }
+                    if (is_selected) ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
 
             ImGui::Checkbox("Show ImGui Demo", &show_imgui_demo);
             ImGui::Checkbox("Show ImPlot Demo", &show_implot_demo);
@@ -502,6 +521,7 @@ public:
     {
         ImGui::Begin("Reverb");
         {
+
             static f64 room   = 1.0;
             static f64 spread = 0.2;
             static f64 damp   = 0.2;
@@ -517,7 +537,8 @@ public:
             static f64 prev_wet = wet;
 
             ImVec2 osc_slider_size(20, 150);
-            ImGui::Text("RM  SPR DMP DCY DRY WET");
+            ImGui::Text("RM  SPR DMP DCY DRY WET"); ImGui::SameLine();
+            ImGui::Checkbox("Mute", &synth.reverb); 
             VSliderDouble("##R",  osc_slider_size, &room,   0.1, 10.0); ImGui::SameLine();
             VSliderDouble("##S",  osc_slider_size, &spread, 0.1, 1.0);  ImGui::SameLine();
             VSliderDouble("##DA", osc_slider_size, &damp,   0.0, 1.0);  ImGui::SameLine();
@@ -551,15 +572,13 @@ public:
     {
         ImGui::Begin("Delay");
         {
-            static s32 steps    = 3;
-            static s32 tempo    = 120;
-            static f64 feedback = 0.7;
-
             ImVec2 osc_slider_size(20, 150);
-            ImGui::Text("STP TMP FDBK");
-            ImGui::VSliderInt("##S", osc_slider_size, &steps, 1, 8);        ImGui::SameLine();
-            ImGui::VSliderInt("##T", osc_slider_size, &tempo, 40, 200);     ImGui::SameLine();
-            VSliderDouble("##F",     osc_slider_size, &feedback, 0.0, 1.0);
+            ImGui::Text("B  BPB BPM FDBK"); ImGui::SameLine();
+            ImGui::Checkbox("Mute", &synth.delay);
+            ImGui::VSliderInt("##B",   osc_slider_size, &synth.m_delay.beat, 1, 16);         ImGui::SameLine();
+            ImGui::VSliderInt("##BPB", osc_slider_size, &synth.m_delay.beat_per_bar, 1, 8); ImGui::SameLine();
+            ImGui::VSliderInt("##BPM", osc_slider_size, &synth.m_delay.bpm, 40, 200);        ImGui::SameLine();
+            VSliderDouble("##F",       osc_slider_size, &synth.m_delay.feedback, 0.0, 1.0);
         }
         ImGui::End();
     }

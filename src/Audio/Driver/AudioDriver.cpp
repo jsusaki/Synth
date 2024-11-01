@@ -29,9 +29,24 @@ void AudioDriver::Stop()
 
 }
 
-std::vector<std::string> AudioDriver::EnumerateOutputDevices()
+void AudioDriver::EnumerateOutputDevices()
 {
-    return { "DEFAULT" };
+
+}
+
+std::vector<std::string> AudioDriver::GetOutputDevices()
+{
+    return m_output_devices;
+}
+
+const s32 AudioDriver::GetOutputDevice()
+{
+    return 0;
+}
+
+void AudioDriver::SetOutputDevice(s32 index)
+{
+
 }
 
 // miniaudio backend
@@ -64,14 +79,13 @@ bool MiniAudio::Open()
     m_device_config.dataCallback = MiniAudio_Callback;
     m_device_config.pUserData = this;
 
-    if (ma_device_init(nullptr, &m_device_config, &m_device) != MA_SUCCESS)
+    if (ma_device_init(&m_context, &m_device_config, &m_device) != MA_SUCCESS)
     {
         std::printf("ERROR: Failed to initialize playback device.\n");
         ma_device_uninit(&m_device);
         ma_context_uninit(&m_context);
         return false;
     }
-
     std::printf("INFO: Audio device initialized\n");
     std::printf("INFO: Device: %s\n", m_device.playback.name);
     std::printf("INFO: Backend: miniaudio | %s\n", ma_get_backend_name(m_context.backend));
@@ -90,6 +104,11 @@ bool MiniAudio::Open()
         ma_context_uninit(&m_context);
         return false;
     }
+    
+    // Store the default device name
+    m_current_device = m_device.playback.name;
+
+    EnumerateOutputDevices();
 
     return true;
 }
@@ -128,6 +147,50 @@ void MiniAudio::Stop()
     ma_mutex_uninit(&m_mutex);
     ma_device_uninit(&m_device);
     ma_context_uninit(&m_context);
+}
+
+void MiniAudio::EnumerateOutputDevices()
+{
+    m_output_devices.clear();
+    std::printf("INFO: Enumerating Devices\n");
+    if (ma_context_get_devices(&m_context, &m_playback_device_infos, &m_playback_device_count, &m_capture_device_infos, &m_capture_device_count) != MA_SUCCESS)
+    {
+        ma_device_uninit(&m_device);
+        ma_context_uninit(&m_context);
+    }
+
+    for (ma_uint32 i = 0; i < m_playback_device_count; i++)
+    {
+        std::string device_name = m_playback_device_infos[i].name;
+        m_output_devices.push_back(device_name);
+        std::printf("INFO:   Device ID: %d %s\n", i, device_name.c_str());
+    }
+}
+
+void MiniAudio::SetOutputDevice(s32 index)
+{
+    if (index < 0 || index > m_output_devices.size())
+    {
+        std::printf("ERROR:    There is no device\n");
+        return;
+    }
+
+    m_device_config.playback.pDeviceID = &m_playback_device_infos[index].id;
+    std::string device_name = m_output_devices[index];
+    std::printf("INFO:   Selected Output Device: %d %s\n", index, device_name.c_str());
+
+    if (ma_device_init(&m_context, &m_device_config, &m_device) != MA_SUCCESS) 
+    {
+        printf("ERROR: Failed to select playback device.\n");
+        ma_device_uninit(&m_device);
+        ma_context_uninit(&m_context);
+    }
+}
+
+const s32 MiniAudio::GetOutputDevice()
+{
+    auto it = std::find(m_output_devices.begin(), m_output_devices.end(), m_current_device);
+    return (it != m_output_devices.end()) ? std::distance(m_output_devices.begin(), it) : 0;
 }
 
 void MiniAudio::FillOutputBuffer(void* pOutput, u32 frameCount)

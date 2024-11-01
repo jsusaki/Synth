@@ -117,7 +117,7 @@ void Application::ProcessInput()
 void Application::Update(f32 dt)
 {
     m_audio.Update(1.0/SAMPLE_RATE);
-    m_gui.Display(m_audio.synth);
+    m_gui.Display(m_audio.synth, m_audio);
 }
 
 void Application::Render()

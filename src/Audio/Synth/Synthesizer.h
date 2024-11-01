@@ -75,26 +75,30 @@
 #include "Delay.h"
 
 // FEATURES
-	// TODO: Low-Frequency Oscillator: Frequency Modulation
 	// TODO: Select Audio Output Device: Enumerate and select from drop down menu
-
-	// TODO: Filter Envelope
+	// TODO: Equalizer
 	// TODO: Effects: Chorus
+	// TODO: Effects: Echo
+	// TODO: Low-Frequency Oscillator: Frequency Modulation
+	// TODO: Filter Envelope
 
 	// TODO: Basic Instruments
 	// TODO: Sequencer
 
 	// TODO: Spectrogram (FFT)
+
 	// TODO: Track
 	// TODO: Record
 	// TODO: Playback
-	// TODO: .wav support
-	// TODO: .midi support
+	// TODO: .wav output support
+	// TODO: .midi input support
+
 	// TODO: Node-based interface
 	// TODO: Modular Synthesizer (module, patch)
 
 // IMPROVEMENTS
 	// TODO: Oscilloscope improvement
+	// TODO: Filter frequency response graph improvement
 
 // REFACTORS
 	// TODO: Synth Input Scheme: reduce to press and release, define the key map elsewhere in the application
@@ -180,6 +184,9 @@ public:
 	bool vafilter = false;
 	Piano m_piano;
 
+	bool delay = false;
 	Delay m_delay;
+
+	bool reverb = false;
 	Reverb m_reverb;
 };

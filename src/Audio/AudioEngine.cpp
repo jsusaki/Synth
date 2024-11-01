@@ -89,10 +89,10 @@ std::vector<f64>& AudioEngine::ProcessOutputBlock(u32 frame_count)
         }
 
         // Delay
-        mixed_output = synth.m_delay.Process(mixed_output);
+        if (!synth.delay) mixed_output = synth.m_delay.Process(mixed_output);
 
         // Reverb
-        mixed_output = synth.m_reverb.Process(mixed_output);
+        if (!synth.reverb) mixed_output = synth.m_reverb.Process(mixed_output);
 
         mixed_output = std::clamp(mixed_output, -1.0, 1.0);
         synth.UpdateWaveData(frame, mixed_output);
@@ -127,4 +127,19 @@ const u32 AudioEngine::Blocks() const
 const u32 AudioEngine::BlockSamples() const
 {
     return m_block_samples;
+}
+
+const std::vector<std::string> AudioEngine::GetOutputDeviceNames()
+{
+    return m_driver->GetOutputDevices();
+}
+
+void AudioEngine::SetOutputDevice(s32 index)
+{
+    m_driver->SetOutputDevice(index);
+}
+
+const s32 AudioEngine::GetOutputDevice()
+{
+    return m_driver->GetOutputDevice();
 }

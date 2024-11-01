@@ -25,10 +25,16 @@ public:
     virtual bool Start();
     virtual void Stop();
 
-    virtual std::vector<std::string> EnumerateOutputDevices();
+    virtual void EnumerateOutputDevices();
+    virtual std::vector<std::string> GetOutputDevices();
+    virtual const s32 GetOutputDevice();
+    virtual void SetOutputDevice(s32 index);
 
 protected:
     AudioEngine* m_host = nullptr;
+
+    std::vector<std::string> m_output_devices;
+    std::string m_current_device;
 };
 
 
@@ -44,6 +50,12 @@ public:
     bool Start() override;
     void Stop() override;
 
+public:
+    void EnumerateOutputDevices() override;
+    void SetOutputDevice(s32 index) override;
+    const s32 GetOutputDevice() override;
+
+public:
     void FillOutputBuffer(void* pOutput, u32 frameCount);
 
 private: // miniaudio specific implementations
@@ -54,4 +66,11 @@ private: // miniaudio specific implementations
     ma_context_config m_context_config;
     ma_device m_device;
     ma_device_config m_device_config;
+
+    ma_device_info* m_playback_device_infos;
+    ma_uint32 m_playback_device_count;
+
+    ma_device_info* m_capture_device_infos;
+    ma_uint32 m_capture_device_count;
+
 };
