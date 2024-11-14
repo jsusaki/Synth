@@ -1,6 +1,7 @@
 #pragma once
 
 #include <complex>
+#include <algorithm>
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -124,6 +125,9 @@ public:
 
             // Reverb
             ReverbEffect(synth);
+
+            // Equalizer
+            Eq(synth);
         }
     }
 
@@ -263,8 +267,8 @@ public:
             const s32 sample_size = 1000;
             f64 time_step = 1 / SAMPLE_RATE;
             f64 note_on_time = 0.00001;
-            f64 note_off_time = 0.0f;
-            f64 global_time = 0.0f;
+            f64 note_off_time = 0.0;
+            f64 global_time = 0.0;
 
             std::vector<f64> as(sample_size, 0.0);
             std::vector<f64> ts(sample_size, 0.0);
@@ -398,7 +402,7 @@ public:
             // TODO: Knobs
             //ImGuiKnobs::KnobDouble("F", &cutoff_freq, 20.0, SAMPLE_RATE/2.0, 100.0f, "%.2fHz", ImGuiKnobVariant_Tick);
             VSliderDouble("##F", ImVec2(40, 300), &cutoff_freq, 20.0, SAMPLE_RATE / 2.0); ImGui::SameLine();
-            VSliderDouble("##R", ImVec2(20, 300), &resonance, 0.0, 1.0, "%.2f");          ImGui::SameLine();
+            VSliderDouble("##R", ImVec2(20, 300), &resonance, 0.0, 10.0, "%.2f");         ImGui::SameLine();
 
             if (resonance != prev_resonance || cutoff_freq != prev_cutoff_freq || filter_type != prev_filter_type)
             {
@@ -460,7 +464,6 @@ public:
 
             ImGui::Text("   C     R   "); ImGui::SameLine();
             ImGui::BeginGroup();          ImGui::SameLine();
-
             ImGui::RadioButton("LPF",  &filter_type, static_cast<s32>(VAFilter::Type::LOW_PASS));   ImGui::SameLine();
             ImGui::RadioButton("HPF",  &filter_type, static_cast<s32>(VAFilter::Type::HIGH_PASS));  ImGui::SameLine();
             ImGui::RadioButton("BPF",  &filter_type, static_cast<s32>(VAFilter::Type::BAND_PASS));  ImGui::SameLine();
@@ -582,6 +585,59 @@ public:
         }
         ImGui::End();
     }
+
+    void Eq(Synthesizer& synth)
+    {
+        ImGui::Begin("Equalizer");
+        {
+            static s32 mode = 0;
+            for (s32 b = 0; b < NUM_BANDS; b++)
+            {
+                Equalizer::Band& band = synth.m_eq.bands[b];
+                band.mode = mode;
+            }
+            
+            // Band controls
+            ImVec2 osc_slider_size(20, 150);
+            for (s32 b = 0; b < NUM_BANDS; b++)
+            {
+                Equalizer::Band& band = synth.m_eq.bands[b];
+
+                ImGui::BeginGroup();
+                ImGui::Text("%.0f Hz", band.frequency);
+
+                //ImGui::Text("F: %.1f Hz", band.frequency);
+                //std::string freq_id = "##Frequency" + std::to_string(b);
+                //VSliderDouble(freq_id.c_str(), osc_slider_size, &band.frequency, 20.0, 20000.0, "%.1f");     ImGui::SameLine();
+
+                //ImGui::Text("G: %.1f dB", band.gain);
+                std::string gain_id = "##Gain" + std::to_string(b);
+                VSliderDouble(gain_id.c_str(), osc_slider_size, &band.gain, -15.0, 15.0, "%.1f"); ImGui::SameLine();
+
+                //ImGui::Text("R: %.1f", band.resonance);
+                std::string resonance_id = "##Resonance" + std::to_string(b);
+                VSliderDouble(resonance_id.c_str(), osc_slider_size, &band.resonance, 0.1, 10.0, "%.1f"); ImGui::SameLine();
+
+                ImGui::EndGroup();
+
+                ImGui::SameLine();
+            }
+
+            ImGui::BeginGroup();
+            ImGui::Checkbox("Mute", &synth.eq);
+            ImGui::RadioButton("LPF",   &mode, 0);
+            ImGui::RadioButton("HPF",   &mode, 2);
+            ImGui::RadioButton("BPF",   &mode, 1);
+            ImGui::RadioButton("PEAK",  &mode, 3);
+            ImGui::RadioButton("NOTCH", &mode, 4);
+            ImGui::RadioButton("LSF",   &mode, 5);
+            ImGui::RadioButton("HSF",   &mode, 6);
+            ImGui::EndGroup();
+
+        }
+        ImGui::End();
+    }
+
 
 private:
     ImGuiIO io;

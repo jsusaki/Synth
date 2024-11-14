@@ -48,6 +48,7 @@ struct Envelope
                 f64 nt = lifetime / attack_time;
                 amplitude_output = CalculateDecay(nt, start_amplitude, decay_function);
             }
+
             // Decay phase
             else if (lifetime > attack_time && lifetime <= (attack_time + decay_time))
             {
@@ -60,7 +61,6 @@ struct Envelope
             {
                 amplitude_output = sustain_amplitude;
             }
-
         }
         else // Note off
         {
@@ -91,10 +91,7 @@ struct Envelope
             amplitude_output = CalculateDecay(nt, a, decay_function) + release_amplitude;
         }
         
-        // Amplitude should not be negative
         amplitude_output = std::clamp(amplitude_output, 0.0, 1.0);
-        //if (amplitude_output <= 0.00001)
-            //amplitude_output = 0.0;
 
         return amplitude_output;
     }

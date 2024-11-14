@@ -12,4 +12,5 @@ public:
     std::vector<s32> current_notes();
 public:
     s32 key_states[256] = { 0 };
+    s32 current_octave;
 };

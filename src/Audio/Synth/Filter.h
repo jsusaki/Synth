@@ -1,9 +1,10 @@
 #pragma once
 
-#include "../../Core/Common.h"
 #include <algorithm>
 #include <complex>
 #include <vector>
+
+#include "../../Core/Common.h"
 
 // Filter: https://en.wikipedia.org/wiki/Filter_(signal_processing)
 // MusicDSP Filters: https://www.musicdsp.org/en/latest/Filters/index.html

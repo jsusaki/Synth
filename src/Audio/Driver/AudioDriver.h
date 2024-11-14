@@ -25,6 +25,7 @@ public:
     virtual bool Start();
     virtual void Stop();
 
+public:
     virtual void EnumerateOutputDevices();
     virtual std::vector<std::string> GetOutputDevices();
     virtual const s32 GetOutputDevice();
@@ -72,5 +73,4 @@ private: // miniaudio specific implementations
 
     ma_device_info* m_capture_device_infos;
     ma_uint32 m_capture_device_count;
-
 };

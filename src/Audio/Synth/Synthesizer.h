@@ -73,9 +73,9 @@
 #include "Filter.h"
 #include "Reverb.h"
 #include "Delay.h"
+#include "Equalizer.h"
 
 // FEATURES
-	// TODO: Select Audio Output Device: Enumerate and select from drop down menu
 	// TODO: Equalizer
 	// TODO: Effects: Chorus
 	// TODO: Effects: Echo
@@ -125,6 +125,7 @@
 	// DONE: Low-Frequency Oscillator: Amplitude Modulation
 	// DONE: Effects: Reverb
 	// DONE: Effects: Delay
+	// DONE: Select Audio Output Device: Enumerate and select from drop down menu
 
 struct WaveData
 {
@@ -189,4 +190,7 @@ public:
 
 	bool reverb = false;
 	Reverb m_reverb;
+
+	bool eq = false;
+	Equalizer m_eq;
 };

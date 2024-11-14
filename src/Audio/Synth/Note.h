@@ -9,11 +9,15 @@ struct note
     f64 off = 0.0;  // Time note was deactivated
     s32 channel = 0;
     bool active = false;
+
+    f64 phase_acc = 0.0;
+    f64 amplitude = 0.0;
+    bool retriggered = false;
 };
 
 // https://pages.mtu.edu/~suits/NoteFreqCalcs.html
 // f_n = f_0 * 2^1/12 ^ n
-//static f64 note_freq(s32 note) { return 440.0f * std::pow(std::pow(2.0f, 1.0f/12.0f), note); } // A4 = 440Hz
+//static f64 note_freq(s32 note) { return 440.0 * std::pow(std::pow(2.0, 1.0f/12.0), note); } // A4 = 440Hz
 
 // https://www.music.mcgill.ca/~gary/307/week1/node28.html
 // MIDI 128 notes mapping formula: f_n = 440 * 2^ (n-69)/12

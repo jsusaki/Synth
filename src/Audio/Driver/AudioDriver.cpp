@@ -115,7 +115,7 @@ bool MiniAudio::Open()
 
 void MiniAudio::Close()
 {
-    std::printf("INFO: Audio device closed\n");
+    std::printf("INFO: Audio device closed.\n");
     ma_mutex_uninit(&m_mutex);
     ma_device_uninit(&m_device);
     ma_context_uninit(&m_context);

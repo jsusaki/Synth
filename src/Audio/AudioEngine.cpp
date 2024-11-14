@@ -32,7 +32,6 @@ void AudioEngine::Update(f64 time_step)
 
 void AudioEngine::Shutdown()
 {
-    std::printf("INFO: Audio device closed.\n");
     m_driver->Close();
 }
 
@@ -61,7 +60,7 @@ std::vector<f64>& AudioEngine::ProcessOutputBlock(u32 frame_count)
                 // TODO: Frequency Modulation
 
                 // Generate wave
-                f64 sound = osc.GenerateWave(m_global_time, n);
+                f64 sound = osc.GenerateWave(m_global_time - n.on, n);
 
                 // Amplitude Modulation
                 sound = (sound * (1.0 + lfo_output)) * amplitude;
@@ -93,6 +92,9 @@ std::vector<f64>& AudioEngine::ProcessOutputBlock(u32 frame_count)
 
         // Reverb
         if (!synth.reverb) mixed_output = synth.m_reverb.Process(mixed_output);
+
+        // Equalizer
+        if (!synth.eq) mixed_output = synth.m_eq.Process(mixed_output);
 
         mixed_output = std::clamp(mixed_output, -1.0, 1.0);
         synth.UpdateWaveData(frame, mixed_output);

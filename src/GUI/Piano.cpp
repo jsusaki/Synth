@@ -19,7 +19,7 @@ void Piano::down(s32 key, s32 velocity)
     key_states[key] = velocity;
 }
 
-void Piano::Render() 
+void Piano::Render()
 {
     ImU32 Black = IM_COL32(0, 0, 0, 255);
     ImU32 White = IM_COL32(255, 255, 255, 255);
@@ -45,6 +45,7 @@ void Piano::Render()
             draw_list->AddRectFilled(key_pos_min, key_pos_max, col, 0, ImDrawFlags_RoundCornersAll);
             draw_list->AddRect(key_pos_min, key_pos_max, Black, 0, ImDrawFlags_RoundCornersAll);
 
+            // Draw characters
             if (cur_key >= 48 && cur_key < 66)
             {
                 const char* key_label = key_names[(cur_key - 12) % 18].c_str();
@@ -58,7 +59,7 @@ void Piano::Render()
         }
 
         cur_key = 22;
-        for (int key = 0; key < 52; key++)
+        for (s32 key = 0; key < 52; key++)
         {
             if (has_black(key))
             {
@@ -71,6 +72,7 @@ void Piano::Render()
                 draw_list->AddRectFilled(black_key_pos_min, black_key_pos_max, col, 0, ImDrawFlags_RoundCornersAll);
                 draw_list->AddRect(black_key_pos_min, black_key_pos_max, Black, 0, ImDrawFlags_RoundCornersAll);
 
+                // Draw characters
                 if (cur_key >= 48 && cur_key < 66)
                 {
                     const char* key_label = key_names[(cur_key - 12) % 18].c_str();
@@ -90,14 +92,12 @@ void Piano::Render()
     ImGui::End();
 }
 
-std::vector<int> Piano::current_notes() 
+std::vector<s32> Piano::current_notes() 
 {
-    std::vector<int> result;
-    for (int i = 0; i < 256; i++) 
+    std::vector<s32> result;
+    for (s32 i = 0; i < 256; i++)
     {
-        if (key_states[i]) 
-            result.push_back(i);
-
+        if (key_states[i]) result.push_back(i);
     }
     return result;
 }

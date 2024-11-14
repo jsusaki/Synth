@@ -102,7 +102,7 @@ void Synthesizer::ProcessNoteInput(f64 time, s32 key, s32 note_id)
             n.off = -1.0;
             n.channel = 0;
             n.active = true;
-            notes.push_back(n);
+            notes.emplace_back(n);
 
             // UI link
             m_piano.down(note_id, 1);
@@ -119,6 +119,7 @@ void Synthesizer::ProcessNoteInput(f64 time, s32 key, s32 note_id)
                 // Key has been pressed again during release phase
                 note_found->on = time;
                 note_found->active = true;
+                note_found->retriggered = true;
 
                 // UI link
                 m_piano.down(note_found->id, 1);
@@ -170,6 +171,8 @@ void Synthesizer::ProcessInput(f64 time)
     if (octave < 0) octave = 0;
 
     if (input.IsKeyPressed(GLFW_KEY_TAB)) notes.clear();
+
+    m_piano.current_octave = octave - 4 * 12;
 }
 
 void Synthesizer::Update(f64 time)
