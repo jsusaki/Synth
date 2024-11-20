@@ -285,9 +285,8 @@ public:
                 global_time += t;
             }
 
-            ImVec2 plot_size(500, 300);
             static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
-            if (ImPlot::BeginPlot("ADSR Envelope", plot_size))
+            if (ImPlot::BeginPlot("ADSR Envelope", ImVec2(500, 300)))
             {
                 ImPlot::SetupAxes(nullptr, "Amplitude", flags | ImPlotAxisFlags_NoGridLines, ImPlotAxisFlags_NoTickMarks);
                 ImPlot::SetupAxisLimits(ImAxis_X1, 0, sample_size, ImGuiCond_Always);
@@ -415,7 +414,6 @@ public:
                 prev_filter_type = filter_type;
             }
 
-
             // Plot Frequency Response: Amplitude Response
             f64 nyquist_freq = SAMPLE_RATE / 2.0;
             const s32 sample_size = 1000;
@@ -431,9 +429,7 @@ public:
                 else           magnitudes[i] = -100.0;
             }
 
-            ImVec2 plot_size(500, 300);
-            static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
-            if (ImPlot::BeginPlot("Amplitude Response", ImVec2(plot_size)))
+            if (ImPlot::BeginPlot("Amplitude Response", ImVec2(500, 300)))
             {
                 ImPlot::SetupAxes("Frequency (Hz)", "Gain (dB)", 0, ImPlotAxisFlags_AutoFit);
                 ImPlot::SetupAxisLimits(ImAxis_X1, 20.0, nyquist_freq, ImGuiCond_Always);
@@ -501,9 +497,8 @@ public:
                 else           magnitudes[i] = -100.0;
             }
 
-            ImVec2 plot_size(500, 300);
             static ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels | ImPlotAxisFlags_NoTickMarks;
-            if (ImPlot::BeginPlot("Amplitude Response", ImVec2(plot_size)))
+            if (ImPlot::BeginPlot("Amplitude Response", ImVec2(500, 300)))
             {
                 ImPlot::SetupAxes("Frequency (Hz)", "Gain (dB)", 0, ImPlotAxisFlags_AutoFit);
                 ImPlot::SetupAxisLimits(ImAxis_X1, 20.0, nyquist_freq, ImGuiCond_Always);
@@ -590,41 +585,103 @@ public:
     {
         ImGui::Begin("Equalizer");
         {
+            static constexpr char const* mode_names[] = {
+                "Low Pass",
+                "High Pass",
+                "Band Pass",
+                "Peak",
+                "Notch",
+                "Low Shelf",
+                "High Shelf"
+            };
+
+            // Custom ticks for the X-axis (Frequency in Hz)
+            static constexpr double x_ticks[] = {
+                20.0,   30.0,   40.0,   60.0,   80.0,   100.0,
+                200.0,  300.0,  400.0,  600.0,  800.0,  1000.0,
+                2000.0, 3000.0, 4000.0, 6000.0, 8000.0, 10000.0,
+                20000.0
+            };
+            static constexpr char const* tick_labels[] = {
+                "20",  "30",  "40",  "60",  "80",  "100",
+                "200", "300", "400", "600", "800", "1K",
+                "2K",  "3K",  "4K",  "6K",  "8K",  "10K",
+                "20K"
+            };
+
+            // Graphical Band controls
+            static constexpr s32 N = 4 * 1024;
+            std::vector<f64> frequencies(N, 0.0); // Hz
+            std::vector<f64> magnitudes(N, 0.0);  // dB
+            for (s32 i = 0; i < N; ++i) 
+            {
+                f64 freq = log_interpolate(20.0, 20000.0, (i + 0.5) / N);
+                f64 sqrt_phi = std::sin(PI * freq * (1.0 / SAMPLE_RATE));
+                f64 phi = sqrt_phi * sqrt_phi;
+                f64 response = 0.0;
+
+                for (s32 b = 0; b < NUM_BANDS; ++b)
+                {
+                    const auto& band = synth.m_eq.bands[b];
+                    f64 b0 = band.filter.b0;
+                    f64 b1 = band.filter.b1;
+                    f64 b2 = band.filter.b2;
+                    f64 a1 = band.filter.a1;
+                    f64 a2 = band.filter.a2;
+
+                    f64 b012 = 0.5 * (b0 + b1 + b2);
+                    f64 a012 = 0.5 * (1.0 + a1 + a2);
+
+                    f64 numerator = b012 * b012 - phi * (4.0 * b0 * b2 * (1.0 - phi) + b1 * (b0 + b2));
+                    f64 denominator = a012 * a012 - phi * (4.0 * a2 * (1.0 - phi) + a1 * (1.0 + a2));
+                    response += 10.0 * (std::log10(numerator) - std::log10(denominator));
+                }
+
+                frequencies[i] = freq;
+                magnitudes[i] = response;
+            }
+
+            ImVec2 space = ImVec2(600, 300);
+            if (ImPlot::BeginPlot("EQ", space))
+            {
+                ImPlot::SetupAxes("Frequency (Hz)", "Gain (dB)", 0, ImPlotAxisFlags_AutoFit);
+                ImPlot::SetupAxisLimits(ImAxis_X1, 20.0, 20000.0, ImGuiCond_Always);
+                ImPlot::SetupAxisLimits(ImAxis_Y1, -18, 18, ImGuiCond_Always); // Y-axis limits for dB (-18 dB to 18 dB)
+                ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Log10);          // Logarithmic scale frequency (Hz)
+                ImPlot::SetupAxisTicks(ImAxis_X1, x_ticks, 19, tick_labels);
+                ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 3.0f);
+                ImPlot::PlotLine("", frequencies.data(), magnitudes.data(), frequencies.size());
+
+                // Band EQ drag point
+                char label[32] = {};
+                char popup_label[32] = {};
+                for (s32 b = 0; b < NUM_BANDS; b++) 
+                {
+                    auto& band = synth.m_eq.bands[b];
+                    sprintf_s(label, "#%i", b);
+
+                    ImPlot::DragPoint(b, &band.frequency, &band.gain, ImVec4(0, 0.9, 0, 1));
+
+                    // Resonance Control
+                    if (ImGui::IsItemHovered()) 
+                        band.resonance = std::clamp(band.resonance - 0.1 * ImGui::GetIO().MouseWheel, 0.0, MAX_Q);
+
+                    ImPlot::PlotText(label, band.frequency, band.gain, ImVec2(0, -12));
+                }
+
+                ImPlot::PopStyleVar();
+                ImPlot::EndPlot();
+            }
+            ImGui::SameLine();
             static s32 mode = 0;
             for (s32 b = 0; b < NUM_BANDS; b++)
             {
                 Equalizer::Band& band = synth.m_eq.bands[b];
                 band.mode = mode;
             }
-            
-            // Band controls
-            ImVec2 osc_slider_size(20, 150);
-            for (s32 b = 0; b < NUM_BANDS; b++)
-            {
-                Equalizer::Band& band = synth.m_eq.bands[b];
-
-                ImGui::BeginGroup();
-                ImGui::Text("%.0f Hz", band.frequency);
-
-                //ImGui::Text("F: %.1f Hz", band.frequency);
-                //std::string freq_id = "##Frequency" + std::to_string(b);
-                //VSliderDouble(freq_id.c_str(), osc_slider_size, &band.frequency, 20.0, 20000.0, "%.1f");     ImGui::SameLine();
-
-                //ImGui::Text("G: %.1f dB", band.gain);
-                std::string gain_id = "##Gain" + std::to_string(b);
-                VSliderDouble(gain_id.c_str(), osc_slider_size, &band.gain, -15.0, 15.0, "%.1f"); ImGui::SameLine();
-
-                //ImGui::Text("R: %.1f", band.resonance);
-                std::string resonance_id = "##Resonance" + std::to_string(b);
-                VSliderDouble(resonance_id.c_str(), osc_slider_size, &band.resonance, 0.1, 10.0, "%.1f"); ImGui::SameLine();
-
-                ImGui::EndGroup();
-
-                ImGui::SameLine();
-            }
 
             ImGui::BeginGroup();
-            ImGui::Checkbox("Mute", &synth.eq);
+            ImGui::Checkbox("Mute",     &synth.eq);
             ImGui::RadioButton("LPF",   &mode, 0);
             ImGui::RadioButton("HPF",   &mode, 2);
             ImGui::RadioButton("BPF",   &mode, 1);
@@ -634,6 +691,16 @@ public:
             ImGui::RadioButton("HSF",   &mode, 6);
             ImGui::EndGroup();
 
+            for (s32 b = 0; b < NUM_BANDS; b++)
+            {
+                Equalizer::Band& band = synth.m_eq.bands[b];
+                ImGui::BeginGroup();
+                ImGui::Text("F: %.1f", band.frequency);
+                ImGui::Text("R: %.1f", band.resonance); 
+                ImGui::Text("G: %.1f", band.gain);      
+                ImGui::EndGroup(); 
+                ImGui::SameLine();
+            }
         }
         ImGui::End();
     }
@@ -641,7 +708,7 @@ public:
 
 private:
     ImGuiIO io;
-    bool show_imgui_demo = false;
+    bool show_imgui_demo  = false;
     bool show_implot_demo = false;
     
     // Control

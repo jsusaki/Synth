@@ -45,8 +45,8 @@ using md4x4 = glm::dmat4x4;
 using qf32 = glm::f32quat;
 using qf64 = glm::f64quat;
 
-const u32 SCREEN_WIDTH = 1600;
-const u32 SCREEN_HEIGHT = 900;
+const u32 SCREEN_WIDTH  = 2000;
+const u32 SCREEN_HEIGHT = 1000;
 
 static const f64 PI = 3.14159265358979323846;
 static const f64 SAMPLE_RATE = 44100.0;

@@ -76,7 +76,6 @@
 #include "Equalizer.h"
 
 // FEATURES
-	// TODO: Equalizer
 	// TODO: Effects: Chorus
 	// TODO: Effects: Echo
 	// TODO: Low-Frequency Oscillator: Frequency Modulation
@@ -126,6 +125,8 @@
 	// DONE: Effects: Reverb
 	// DONE: Effects: Delay
 	// DONE: Select Audio Output Device: Enumerate and select from drop down menu
+	// DONE: Equalizer
+	// DONE: Graphical Equalizer
 
 struct WaveData
 {
