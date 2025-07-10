@@ -249,17 +249,17 @@ public:
         ImGui::Begin(name.c_str());
         {
             ImGui::Text(" A   D   S   R"); ImGui::SameLine();
-            ImGui::BeginGroup(); ImGui::SameLine();
+            ImGui::BeginGroup();           ImGui::SameLine();
             ImGui::RadioButton("LINEAR", &decay_function, static_cast<s32>(Envelope::Decay::LINEAR));      ImGui::SameLine();
             ImGui::RadioButton("EXPO",   &decay_function, static_cast<s32>(Envelope::Decay::EXPONENTIAL)); ImGui::SameLine();
             ImGui::RadioButton("QUAD",   &decay_function, static_cast<s32>(Envelope::Decay::QUADRATIC));
             ImGui::EndGroup();
 
             ImVec2 slider_size(20, 300);
-            VSliderDouble("##A", slider_size, &env.attack_time, 0.0, 10.0, "%.2f");      ImGui::SameLine();
-            VSliderDouble("##D", slider_size, &env.decay_time, 0.0, 10.0, "%.2f");       ImGui::SameLine();
-            VSliderDouble("##S", slider_size, &env.sustain_amplitude, 0.0, 1.0, "%.2f"); ImGui::SameLine();
-            VSliderDouble("##R", slider_size, &env.release_time, 0.0, 10.0, "%.2f");     ImGui::SameLine();
+            VSliderDouble("##A", slider_size, &env.attack_time, 0.01, 10.0, "%.2f");      ImGui::SameLine();
+            VSliderDouble("##D", slider_size, &env.decay_time,  0.01, 10.0, "%.2f");      ImGui::SameLine();
+            VSliderDouble("##S", slider_size, &env.sustain_amplitude, 0.01, 1.0, "%.2f"); ImGui::SameLine();
+            VSliderDouble("##R", slider_size, &env.release_time, 0.01, 10.0, "%.2f");     ImGui::SameLine();
 
             env.decay_function = static_cast<Envelope::Decay>(decay_function);
 
@@ -610,17 +610,17 @@ public:
             };
 
             // Graphical Band controls
-            static constexpr s32 N = 4 * 1024;
+            static constexpr s32 N = 4*1024;
             std::vector<f64> frequencies(N, 0.0); // Hz
             std::vector<f64> magnitudes(N, 0.0);  // dB
-            for (s32 i = 0; i < N; ++i) 
+            for (s32 i = 0; i < N; i++) 
             {
                 f64 freq = log_interpolate(20.0, 20000.0, (i + 0.5) / N);
                 f64 sqrt_phi = std::sin(PI * freq * (1.0 / SAMPLE_RATE));
                 f64 phi = sqrt_phi * sqrt_phi;
                 f64 response = 0.0;
 
-                for (s32 b = 0; b < NUM_BANDS; ++b)
+                for (s32 b = 0; b < NUM_BANDS; b++)
                 {
                     const auto& band = synth.m_eq.bands[b];
                     f64 b0 = band.filter.b0;
@@ -629,10 +629,10 @@ public:
                     f64 a1 = band.filter.a1;
                     f64 a2 = band.filter.a2;
 
-                    f64 b012 = 0.5 * (b0 + b1 + b2);
+                    f64 b012 = 0.5 *  (b0 + b1 + b2);
                     f64 a012 = 0.5 * (1.0 + a1 + a2);
 
-                    f64 numerator = b012 * b012 - phi * (4.0 * b0 * b2 * (1.0 - phi) + b1 * (b0 + b2));
+                    f64 numerator   = b012 * b012 - phi * (4.0 * b0 * b2 * (1.0 - phi) + b1 * (b0 + b2));
                     f64 denominator = a012 * a012 - phi * (4.0 * a2 * (1.0 - phi) + a1 * (1.0 + a2));
                     response += 10.0 * (std::log10(numerator) - std::log10(denominator));
                 }
@@ -650,6 +650,8 @@ public:
                 ImPlot::SetupAxisScale(ImAxis_X1, ImPlotScale_Log10);          // Logarithmic scale frequency (Hz)
                 ImPlot::SetupAxisTicks(ImAxis_X1, x_ticks, 19, tick_labels);
                 ImPlot::PushStyleVar(ImPlotStyleVar_LineWeight, 3.0f);
+
+
                 ImPlot::PlotLine("", frequencies.data(), magnitudes.data(), frequencies.size());
 
                 // Band EQ drag point

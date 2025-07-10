@@ -82,7 +82,7 @@ Synthesizer::Synthesizer()
 
 f64 Synthesizer::Synthesize(f64 time_step, note n, bool& note_finished)
 {
-
+    return 0.0;
 }
 
 void Synthesizer::ProcessNoteInput(f64 time, s32 key, s32 note_id)
